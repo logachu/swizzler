@@ -1,0 +1,33 @@
+{
+  "attribute": {
+    "name": "_EHR/appointments",
+    "group_by": "EPI"
+  },
+  "template": {
+    "group_by": "appointment_id",
+    "template": {
+      "appointment_id": "{appointment_id}",
+      "date": "{appointment_date}",
+      "time": "{appointment_time}",
+      "provider": {
+        "name": "{provider_name}",
+        "specialty": "{provider_specialty}"
+      },
+      "location": "{location}",
+      "procedures": {
+        "collect": [
+          {
+            "code": "{procedure_code}",
+            "name": "{procedure_name}",
+            "costs": {
+              "copay": "{estimated_copay}",
+              "hospital": "{hospital_billing}",
+              "professional": "{profession_billing}",
+              "insurance_covered": "{insurance_covered}"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+﻿EPI,appointment_id,appointment_date,appointment_time,provider_name,provider_specialty,location,procedure_code,procedure_name,estimated_copay,hospital_billing,profession_billing,insurance_covered
+EPI123456,APT001,2025-11-15,9:00,Dr. Sarah Johnson,Cardiology,Main Hospital - Room 301,PROC001,EKG Test,$42.20,$158.55,$120.35,FALSE
+EPI123456,APT001,2025-11-15,9:00,Dr. Sarah Johnson,Cardiology,Main Hospital - Room 301,PROC002,Blood Pressure Monitoring,$20.94,$300.05,$139.61,TRUE
+EPI123456,APT001,2025-11-15,9:00,Dr. Sarah Johnson,Cardiology,Main Hospital - Room 301,PROC003,Consultation,$12.62,$373.16,$233.19,TRUE
+EPI123456,APT002,2025-11-20,14:30,Dr. Michael Chen,Orthopedics,Clinic B - Suite 205,PROC004,X-Ray,$15.29,$429.20,$64.59,TRUE
+EPI123456,APT002,2025-11-20,14:30,Dr. Michael Chen,Orthopedics,Clinic B - Suite 205,PROC005,Physical Exam,$43.79,$444.94,$279.58,FALSE
+EPI123456,APT003,2025-11-22,10:15,Dr. Emily Rodriguez,Family Medicine,Wellness Center,PROC006,Annual Checkup,$67.50,$468.10,$94.63,FALSE
+EPI789012,APT001,2025-11-25,11:00,Dr. Laura Smith,Dermatology,Skin Care Clinic,PROC007,Skin Biopsy,$55.95,$321.90,$203.07,FALSE
+EPI789012,APT001,2025-11-25,11:00,Dr. Laura Smith,Dermatology,Skin Care Clinic,PROC008,Consultation,$43.61,$245.46,$152.70,TRUE
+EPI789012,APT002,2025-11-28,15:00,Dr. Robert Brown,Neurology,Neuro Center,PROC009,MRI Scan,$19.42,$499.43,$101.92,TRUE
+EPI789012,APT002,2025-11-28,15:00,Dr. Robert Brown,Neurology,Neuro Center,PROC010,Follow-up,$72.41,$457.91,$205.57,FALSE
+EPI345678,APT001,2025-12-02,09:30,Dr. Anna White,Pediatrics,Children's Hospital,PROC011,Vaccination,$23.89,$469.67,$253.19,TRUE
+EPI345678,APT001,2025-12-02,09:30,Dr. Anna White,Pediatrics,Children's Hospital,PROC012,General Checkup,$15.99,$356.03,$254.00,TRUE
+EPI345678,APT002,2025-12-05,13:45,Dr. James Green,Ophthalmology,Eye Care Center,PROC013,Eye Exam,$43.93,$330.61,$82.89,FALSE
+EPI345678,APT002,2025-12-05,13:45,Dr. James Green,Ophthalmology,Eye Care Center,PROC014,Prescription Update,$24.50,$396.47,$81.08,FALSE

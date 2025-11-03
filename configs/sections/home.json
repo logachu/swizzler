@@ -1,0 +1,7 @@
+{
+  "title": "Upcoming Appointments",
+  "description": "Your scheduled medical appointments",
+  "cards": [
+    "appointment_card.json"
+  ]
+}

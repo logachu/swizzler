@@ -1,0 +1,17 @@
+{
+  "attribute": "_EHR/appointments",
+  "foreach": "$[*]",
+  "filter_by": {
+    "field": "appointment_id",
+    "value": "${appointment_id}"
+  },
+  "extract": "procedures",
+  "template": {
+    "title": "{$.name}",
+    "code": "Code: {$.code}",
+    "copay": "Copay: {$.costs.copay}",
+    "hospital_billing": "Hospital: {$.costs.hospital}",
+    "professional_billing": "Professional: {$.costs.professional}",
+    "insurance_note": "?Covered by insurance"
+  }
+}
