@@ -30,8 +30,9 @@ wheels/
 # PyCharm
 .idea/
 
-# VS Code
-.vscode/
+# VS Code (keep settings.json, ignore others)
+.vscode/*
+!.vscode/settings.json
 
 # macOS
 .DS_Store
