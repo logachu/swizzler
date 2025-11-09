@@ -10,6 +10,8 @@ Functions:
     load() - Read CSV file and configuration
     cleanse() - Clean and validate data
     combine() - Apply configuration and generate nested JSON output
+
+These functions are meant to map to Databricks pipeline stages.
 """
 
 import csv
@@ -162,6 +164,25 @@ def apply_template(rows: List[Dict[str, Any]], template: Any) -> Any:
                 return [build(nested_template, group_rows) for group_rows in grouped.values()]
 
             # Regular object mapping
+            # Check for potential data loss: if multiple rows exist and we're mapping fields directly,
+            # we need to validate that all rows have the same values for non-nested fields
+            if len(data_rows) > 1:
+                # Check if any non-nested fields have different values across rows
+                for key, value in tmpl.items():
+                    if key in ("group_by", "template"):
+                        continue
+                    # Only check non-nested fields (strings with column references)
+                    if isinstance(value, str) and value.startswith("{") and value.endswith("}"):
+                        column_name = value[1:-1]
+                        first_value = data_rows[0].get(column_name)
+                        # Check if all rows have the same value for this column
+                        if not all(row.get(column_name) == first_value for row in data_rows):
+                            raise ValueError(
+                                f"Template maps field '{key}' directly to column '{column_name}', "
+                                f"but {len(data_rows)} rows exist with different values. "
+                                f"Use 'collect' to create a list with all values, or 'group_by' to subdivide the data."
+                            )
+
             result = {}
             row = data_rows[0]  # Use first row for field values
             for key, value in tmpl.items():
