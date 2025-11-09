@@ -1,0 +1,66 @@
+[
+  {
+    "appointment_id": "APT004",
+    "date": "2025-11-25",
+    "time": "11:00",
+    "provider": {
+      "name": "Dr. Laura Smith",
+      "specialty": "Dermatology"
+    },
+    "location": "Skin Care Clinic",
+    "procedures": [
+      {
+        "code": "PROC007",
+        "name": "Skin Biopsy",
+        "costs": {
+          "copay": "$55.95",
+          "hospital": "$321.90",
+          "professional": "$203.07",
+          "insurance_covered": "FALSE"
+        }
+      },
+      {
+        "code": "PROC008",
+        "name": "Consultation",
+        "costs": {
+          "copay": "$43.61",
+          "hospital": "$245.46",
+          "professional": "$152.70",
+          "insurance_covered": "TRUE"
+        }
+      }
+    ]
+  },
+  {
+    "appointment_id": "APT005",
+    "date": "2025-11-28",
+    "time": "15:00",
+    "provider": {
+      "name": "Dr. Robert Brown",
+      "specialty": "Neurology"
+    },
+    "location": "Neuro Center",
+    "procedures": [
+      {
+        "code": "PROC009",
+        "name": "MRI Scan",
+        "costs": {
+          "copay": "$19.42",
+          "hospital": "$499.43",
+          "professional": "$101.92",
+          "insurance_covered": "TRUE"
+        }
+      },
+      {
+        "code": "PROC010",
+        "name": "Follow-up",
+        "costs": {
+          "copay": "$72.41",
+          "hospital": "$457.91",
+          "professional": "$205.57",
+          "insurance_covered": "FALSE"
+        }
+      }
+    ]
+  }
+]

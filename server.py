@@ -58,7 +58,7 @@ class ConfigLoader:
 class AttributeLoader:
     """Loads patient attribute data from JSON files."""
 
-    def __init__(self, output_dir: str = "output"):
+    def __init__(self, output_dir: str = "mock_personstore"):
         self.output_dir = Path(output_dir)
 
     def load_attribute(self, epi: str, attribute_name: str) -> Any:

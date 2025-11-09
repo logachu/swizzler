@@ -1,0 +1,33 @@
+{
+    "title": "Active Medications",
+    "description": "Your current prescriptions and refill information",
+    "cards": [
+        {
+            "title": "Levothyroxine",
+            "subtitle": "75mcg - once daily before breakfast",
+            "prescriber": "Prescribed by Dr. Robert Taylor, Endocrinology",
+            "refill_count": "4 refill(s) on record",
+            "?last_refill": "2024-08-16",
+            "?pharmacy": "CVS Pharmacy",
+            "status": "active"
+        },
+        {
+            "title": "Albuterol Inhaler",
+            "subtitle": "90mcg - 2 puffs every 4-6 hours as needed",
+            "prescriber": "Prescribed by Dr. Emily White, Pulmonology",
+            "refill_count": "2 refill(s) on record",
+            "?last_refill": "2024-09-08",
+            "?pharmacy": "Walgreens",
+            "status": "active"
+        },
+        {
+            "title": "Omeprazole",
+            "subtitle": "20mg - once daily",
+            "prescriber": "Prescribed by Dr. James Brown, Gastroenterology",
+            "refill_count": "3 refill(s) on record",
+            "?last_refill": "2024-09-28",
+            "?pharmacy": "CVS Pharmacy",
+            "status": "active"
+        }
+    ]
+}

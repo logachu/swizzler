@@ -1,0 +1,11 @@
+{
+  "attribute": {
+    "name": "medical_visit",
+    "group_by": "patient_id"
+  },
+  "template": {
+    "visit_date": "{visit_date}",
+    "primary_diagnosis": "{diagnosis}",
+    "severity_level": "{severity}"
+  }
+}

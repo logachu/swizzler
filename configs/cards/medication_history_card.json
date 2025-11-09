@@ -1,0 +1,14 @@
+{
+  "attribute": "_EHR/prescriptions",
+  "foreach": "$[*]",
+  "template": {
+    "title": "{$.medication_name}",
+    "subtitle": "{$.dosage} - {$.frequency}",
+    "prescriber": "Prescribed by {$.prescriber.name}, {$.prescriber.specialty}",
+    "status": "{$.status}",
+    "start_date": "Started {format_date($.start_date, '%b %d, %Y')}",
+    "?end_date": "Ended {format_date($.end_date, '%b %d, %Y')}",
+    "refill_count": "{len($.refills)} refill(s)",
+    "?last_refill": "Last filled {format_date($.refills[-1].refill_date, '%b %d, %Y')}"
+  }
+}

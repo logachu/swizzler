@@ -1,0 +1,4 @@
+patient_id,visit_date,diagnosis,severity
+PAT001,2025-11-01,Hypertension,Moderate
+PAT001,2025-11-01,Diabetes,Severe
+PAT001,2025-11-01,Arthritis,Mild

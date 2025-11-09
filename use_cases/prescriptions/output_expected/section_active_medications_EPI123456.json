@@ -1,0 +1,33 @@
+{
+    "title": "Active Medications",
+    "description": "Your current prescriptions and refill information",
+    "cards": [
+        {
+            "title": "Lisinopril",
+            "subtitle": "10mg - once daily",
+            "prescriber": "Prescribed by Dr. Sarah Johnson, Cardiology",
+            "refill_count": "4 refill(s) on record",
+            "?last_refill": "2024-10-15",
+            "?pharmacy": "CVS Pharmacy",
+            "status": "active"
+        },
+        {
+            "title": "Metformin",
+            "subtitle": "500mg - twice daily",
+            "prescriber": "Prescribed by Dr. Michael Chen, Endocrinology",
+            "refill_count": "3 refill(s) on record",
+            "?last_refill": "2024-08-28",
+            "?pharmacy": "Walgreens",
+            "status": "active"
+        },
+        {
+            "title": "Atorvastatin",
+            "subtitle": "20mg - once daily at bedtime",
+            "prescriber": "Prescribed by Dr. Sarah Johnson, Cardiology",
+            "refill_count": "3 refill(s) on record",
+            "?last_refill": "2024-08-09",
+            "?pharmacy": "CVS Pharmacy",
+            "status": "active"
+        }
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "title": "Upcoming Appointments",
+    "description": "Your scheduled medical appointments",
+    "cards": [
+        {
+            "title": "Dr. Anna White",
+            "subtitle": "Pediatrics",
+            "datetime": "Dec 02 at 09:30",
+            "location": "Children's Hospital",
+            "procedure_count": "2 procedure(s)",
+            "days_until": "23 days from now"
+        },
+        {
+            "title": "Dr. James Green",
+            "subtitle": "Ophthalmology",
+            "datetime": "Dec 05 at 13:45",
+            "location": "Eye Care Center",
+            "procedure_count": "2 procedure(s)",
+            "days_until": "26 days from now"
+        }
+    ]
+}

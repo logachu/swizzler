@@ -1,0 +1,17 @@
+{
+  "visit_date": "2025-11-01",
+  "diagnoses": [
+    {
+      "name": "Hypertension",
+      "severity": "Moderate"
+    },
+    {
+      "name": "Diabetes",
+      "severity": "Severe"
+    },
+    {
+      "name": "Arthritis",
+      "severity": "Mild"
+    }
+  ]
+}

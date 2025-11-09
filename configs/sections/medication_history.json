@@ -1,0 +1,7 @@
+{
+  "title": "Medication History",
+  "description": "All prescriptions including discontinued medications",
+  "cards": [
+    "medication_history_card.json"
+  ]
+}

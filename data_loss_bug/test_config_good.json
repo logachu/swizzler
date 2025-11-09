@@ -1,0 +1,17 @@
+{
+  "attribute": {
+    "name": "medical_visit_fixed",
+    "group_by": "patient_id"
+  },
+  "template": {
+    "visit_date": "{visit_date}",
+    "diagnoses": {
+      "collect": [
+        {
+          "name": "{diagnosis}",
+          "severity": "{severity}"
+        }
+      ]
+    }
+  }
+}

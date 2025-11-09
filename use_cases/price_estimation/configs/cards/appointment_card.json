@@ -1,0 +1,12 @@
+{
+  "attribute": "_EHR/appointments",
+  "foreach": "$[*]",
+  "template": {
+    "title": "{$.provider.name}",
+    "subtitle": "{$.provider.specialty}",
+    "datetime": "{format_date($.date, '%b %d')} at {$.time}",
+    "location": "{$.location}",
+    "procedure_count": "{len($.procedures)} procedure(s)",
+    "days_until": "{days_from_now($.date)}"
+  }
+}

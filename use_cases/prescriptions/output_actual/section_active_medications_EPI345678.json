@@ -1,0 +1,33 @@
+{
+    "title": "Active Medications",
+    "description": "Your current prescriptions and refill information",
+    "cards": [
+        {
+            "title": "Sertraline",
+            "subtitle": "50mg - once daily",
+            "prescriber": "Prescribed by Dr. Patricia Green, Psychiatry",
+            "refill_count": "2 refill(s) on record",
+            "?last_refill": "2024-08-13",
+            "?pharmacy": "Walgreens",
+            "status": "active"
+        },
+        {
+            "title": "Losartan",
+            "subtitle": "50mg - once daily",
+            "prescriber": "Prescribed by Dr. Sarah Johnson, Cardiology",
+            "refill_count": "2 refill(s) on record",
+            "?last_refill": "2024-09-29",
+            "?pharmacy": "CVS Pharmacy",
+            "status": "active"
+        },
+        {
+            "title": "Vitamin D3",
+            "subtitle": "2000IU - once daily",
+            "prescriber": "Prescribed by Dr. Lisa Martinez, Primary Care",
+            "refill_count": "2 refill(s) on record",
+            "?last_refill": "2024-08-30",
+            "?pharmacy": "Rite Aid",
+            "status": "active"
+        }
+    ]
+}

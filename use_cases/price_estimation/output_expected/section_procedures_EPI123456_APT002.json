@@ -1,0 +1,22 @@
+{
+    "title": "Appointment Procedures",
+    "description": "Detailed procedure list for this appointment",
+    "cards": [
+        {
+            "title": "X-Ray",
+            "code": "Code: PROC004",
+            "copay": "Copay: $15.29",
+            "hospital_billing": "Hospital: $429.20",
+            "professional_billing": "Professional: $64.59",
+            "insurance_note": "Covered by insurance"
+        },
+        {
+            "title": "Physical Exam",
+            "code": "Code: PROC005",
+            "copay": "Copay: $43.79",
+            "hospital_billing": "Hospital: $444.94",
+            "professional_billing": "Professional: $279.58",
+            "insurance_note": "Covered by insurance"
+        }
+    ]
+}

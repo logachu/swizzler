@@ -1,0 +1,66 @@
+[
+  {
+    "appointment_id": "APT006",
+    "date": "2025-12-02",
+    "time": "09:30",
+    "provider": {
+      "name": "Dr. Anna White",
+      "specialty": "Pediatrics"
+    },
+    "location": "Children's Hospital",
+    "procedures": [
+      {
+        "code": "PROC011",
+        "name": "Vaccination",
+        "costs": {
+          "copay": "$23.89",
+          "hospital": "$469.67",
+          "professional": "$253.19",
+          "insurance_covered": "TRUE"
+        }
+      },
+      {
+        "code": "PROC012",
+        "name": "General Checkup",
+        "costs": {
+          "copay": "$15.99",
+          "hospital": "$356.03",
+          "professional": "$254.00",
+          "insurance_covered": "TRUE"
+        }
+      }
+    ]
+  },
+  {
+    "appointment_id": "APT007",
+    "date": "2025-12-05",
+    "time": "13:45",
+    "provider": {
+      "name": "Dr. James Green",
+      "specialty": "Ophthalmology"
+    },
+    "location": "Eye Care Center",
+    "procedures": [
+      {
+        "code": "PROC013",
+        "name": "Eye Exam",
+        "costs": {
+          "copay": "$43.93",
+          "hospital": "$330.61",
+          "professional": "$82.89",
+          "insurance_covered": "FALSE"
+        }
+      },
+      {
+        "code": "PROC014",
+        "name": "Prescription Update",
+        "costs": {
+          "copay": "$24.50",
+          "hospital": "$396.47",
+          "professional": "$81.08",
+          "insurance_covered": "FALSE"
+        }
+      }
+    ]
+  }
+]

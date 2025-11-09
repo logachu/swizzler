@@ -1,0 +1,7 @@
+{
+  "title": "Active Medications",
+  "description": "Your current prescriptions and refill information",
+  "cards": [
+    "medication_card.json"
+  ]
+}

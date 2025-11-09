@@ -75,7 +75,7 @@ def cleanse(csv_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return cleansed_rows
 
 
-def combine(csv_rows: List[Dict[str, Any]], config: Dict[str, Any], output_dir: str = "output") -> None:
+def combine(csv_rows: List[Dict[str, Any]], config: Dict[str, Any], output_dir: str = "mock_personstore") -> None:
     """
     Apply configuration template and generate nested JSON output files.
 
@@ -208,7 +208,7 @@ def main():
     )
     parser.add_argument("csv_file", help="Path to the CSV file to process")
     parser.add_argument("transform_file", help="Path to the JSON transformation configuration file")
-    parser.add_argument("-o", "--output", default="output", help="Output directory for JSON files (default: output)")
+    parser.add_argument("-o", "--output", default="mock_personstore", help="Output directory for JSON files (default: mock_personstore)")
 
     args = parser.parse_args()
 

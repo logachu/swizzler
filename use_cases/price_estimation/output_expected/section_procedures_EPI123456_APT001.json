@@ -1,0 +1,30 @@
+{
+    "title": "Appointment Procedures",
+    "description": "Detailed procedure list for this appointment",
+    "cards": [
+        {
+            "title": "EKG Test",
+            "code": "Code: PROC001",
+            "copay": "Copay: $42.20",
+            "hospital_billing": "Hospital: $158.55",
+            "professional_billing": "Professional: $120.35",
+            "insurance_note": "Covered by insurance"
+        },
+        {
+            "title": "Blood Pressure Monitoring",
+            "code": "Code: PROC002",
+            "copay": "Copay: $20.94",
+            "hospital_billing": "Hospital: $300.05",
+            "professional_billing": "Professional: $139.61",
+            "insurance_note": "Covered by insurance"
+        },
+        {
+            "title": "Consultation",
+            "code": "Code: PROC003",
+            "copay": "Copay: $12.62",
+            "hospital_billing": "Hospital: $373.16",
+            "professional_billing": "Professional: $233.19",
+            "insurance_note": "Covered by insurance"
+        }
+    ]
+}
