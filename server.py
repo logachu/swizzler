@@ -10,7 +10,7 @@ import json
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Match
 
 from fastapi import FastAPI, Header, HTTPException, Path as PathParam
 from jsonpath_ng import parse as jsonpath_parse
@@ -111,7 +111,7 @@ class JSONPathEngine:
         Returns:
             Expression with variables substituted
         """
-        def replace_var(match):
+        def replace_var(match: Match[str]) -> str:
             var_name = match.group(1)
             return variables.get(var_name, match.group(0))
 
@@ -298,7 +298,7 @@ class ExpressionParser:
         Returns:
             String with all expressions evaluated and substituted
         """
-        def replace_expr(match):
+        def replace_expr(match: Match[str]) -> str:
             expr = match.group(1)
             value = self.evaluate_expression(expr, data, variables)
             return str(value) if value is not None else ""
@@ -342,6 +342,9 @@ class CardRenderer:
 
         # Extract config components
         attribute_name = card_config.get("attribute")
+        if not attribute_name or not isinstance(attribute_name, str):
+            raise ValueError(f"Card config '{card_config_name}' missing required 'attribute' field")
+
         foreach_expr = card_config.get("foreach", "$")
         filter_by = card_config.get("filter_by")
         extract = card_config.get("extract")
