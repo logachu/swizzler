@@ -35,12 +35,13 @@ A CLI tool that transforms denormalized CSV data into nested JSON documents usin
 
 ```bash
 python batch_process.py <csv_file> <transform_file> [-o output_dir]
-```plaintext
+```
 
 **Example:**
 
 ```bash
-python batch_process.py price_estimates.csv csv_transform.json
+python batch_process.py use_cases/price_estimation/price_estimates.csv \
+                        use_cases/price_estimation/csv_transform.json
 ```
 
 ##### Configuration Format
@@ -164,20 +165,29 @@ Use `${variable_name}` in card configs to inject URL path parameters (e.g., `${a
 .
 ├── batch_process.py          # CSV transformer
 ├── server.py                 # FastAPI backend server
+├── test_use_cases.py         # Automated test suite
 ├── requirements.txt          # Python dependencies
-├── csv_transform.json        # Sample CSV transform config
-├── price_estimates.csv       # Sample data
-├── configs/
+├── configs/                  # Shared configurations for all use cases
 │   ├── sections/            # Section configurations
-│   │   ├── home.json
-│   │   └── procedures.json
 │   └── cards/               # Card template configurations
-│       ├── appointment_card.json
-│       └── procedure_card.json
-└── output/                  # Generated JSON files (patient attributes)
-    ├── EPI123456__EHR_appointments.json
-    ├── EPI789012__EHR_appointments.json
-    └── EPI345678__EHR_appointments.json
+├── mock_personstore/        # Generated JSON files (simulates PersonStore database)
+│   ├── EPI123456__EHR_appointments.json
+│   ├── EPI123456__EHR_prescriptions.json
+│   ├── EPI789012__EHR_appointments.json
+│   └── ...
+└── use_cases/               # Use case examples
+    ├── price_estimation/
+    │   ├── price_estimates.csv
+    │   ├── csv_transform.json
+    │   ├── configs/         # Use case-specific configs
+    │   ├── output_expected/ # Expected API responses
+    │   └── output_actual/   # Actual API responses (for testing)
+    └── prescriptions/
+        ├── prescriptions.csv
+        ├── csv_transform.json
+        ├── configs/
+        ├── output_expected/
+        └── output_actual/
 ```
 
 ### Example Workflow
@@ -185,7 +195,13 @@ Use `${variable_name}` in card configs to inject URL path parameters (e.g., `${a
 1. **Transform CSV to JSON:**
 
    ```bash
-   python batch_process.py price_estimates.csv csv_transform.json
+   # Process price estimation use case
+   python batch_process.py use_cases/price_estimation/price_estimates.csv \
+                           use_cases/price_estimation/csv_transform.json
+
+   # Process prescriptions use case
+   python batch_process.py use_cases/prescriptions/prescriptions.csv \
+                           use_cases/prescriptions/csv_transform.json
    ```
 
 2. **Start the server:**
@@ -194,7 +210,13 @@ Use `${variable_name}` in card configs to inject URL path parameters (e.g., `${a
    python server.py
    ```
 
-3. **Fetch patient data:**
+3. **Test all use cases:**
+
+   ```bash
+   python test_use_cases.py
+   ```
+
+4. **Fetch patient data:**
 
    ```bash
    # Get upcoming appointments
@@ -202,6 +224,9 @@ Use `${variable_name}` in card configs to inject URL path parameters (e.g., `${a
 
    # Get procedures for specific appointment
    curl -H "X-EPI: EPI123456" http://localhost:8000/section/procedures/APT001
+
+   # Get active medications
+   curl -H "X-EPI: EPI123456" http://localhost:8000/section/active_medications
    ```
 
 ### Key Design Decisions

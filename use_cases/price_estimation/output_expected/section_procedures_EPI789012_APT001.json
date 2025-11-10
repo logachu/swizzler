@@ -1,5 +1,22 @@
 {
     "title": "Appointment Procedures",
     "description": "Detailed procedure list for this appointment",
-    "cards": []
+    "cards": [
+        {
+            "title": "Skin Biopsy",
+            "code": "Code: PROC007",
+            "copay": "Copay: $55.95",
+            "hospital_billing": "Hospital: $321.90",
+            "professional_billing": "Professional: $203.07",
+            "insurance_note": "Covered by insurance"
+        },
+        {
+            "title": "Consultation",
+            "code": "Code: PROC008",
+            "copay": "Copay: $43.61",
+            "hospital_billing": "Hospital: $245.46",
+            "professional_billing": "Professional: $152.70",
+            "insurance_note": "Covered by insurance"
+        }
+    ]
 }

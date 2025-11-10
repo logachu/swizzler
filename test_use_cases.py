@@ -123,16 +123,19 @@ class ServerTester:
         """Start the FastAPI server."""
         print("Starting server...")
 
+        # Get absolute path to project root
+        project_root = Path(__file__).parent.absolute()
+
         # Activate venv and start server
         self.server_process = subprocess.Popen(
-            ["bash", "-c", "source venv/bin/activate && python server.py"],
+            ["bash", "-c", f"{project_root}/venv/bin/python3.13 {project_root}/server.py"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
 
         # Wait for server to start
         max_retries = 30
-        for i in range(max_retries):
+        for _ in range(max_retries):
             try:
                 response = requests.get(f"{self.server_url}/health", timeout=1)
                 if response.status_code == 200:
