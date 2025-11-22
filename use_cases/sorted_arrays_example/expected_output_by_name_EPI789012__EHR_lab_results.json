@@ -5,17 +5,17 @@
     "provider": "Dr. Sarah Johnson",
     "tests": [
       {
-        "test_code": "TEST003",
-        "test_name": "Triglycerides",
+        "test_code": "TEST001",
+        "test_name": "Cholesterol",
         "result": {
-          "value": "95",
+          "value": "220",
           "unit": "mg/dL",
-          "reference_range": "<150"
+          "reference_range": "<200"
         },
         "status": "completed",
-        "abnormal_flag": "Normal",
+        "abnormal_flag": "High",
         "priority": "stat",
-        "cost": "$95.50"
+        "cost": "$89.99"
       },
       {
         "test_code": "TEST002",
@@ -31,17 +31,17 @@
         "cost": "$125.00"
       },
       {
-        "test_code": "TEST001",
-        "test_name": "Cholesterol",
+        "test_code": "TEST003",
+        "test_name": "Triglycerides",
         "result": {
-          "value": "220",
+          "value": "95",
           "unit": "mg/dL",
-          "reference_range": "<200"
+          "reference_range": "<150"
         },
         "status": "completed",
-        "abnormal_flag": "High",
+        "abnormal_flag": "Normal",
         "priority": "stat",
-        "cost": "$89.99"
+        "cost": "$95.50"
       }
     ]
   },
@@ -97,19 +97,6 @@
     "provider": "Dr. Emily Rodriguez",
     "tests": [
       {
-        "test_code": "TEST005",
-        "test_name": "White Blood Cell Count",
-        "result": {
-          "value": "7.8",
-          "unit": "K/uL",
-          "reference_range": "4.5-11.0"
-        },
-        "status": "completed",
-        "abnormal_flag": "Normal",
-        "priority": "routine",
-        "cost": "$35.50"
-      },
-      {
         "test_code": "TEST007",
         "test_name": "Hemoglobin",
         "result": {
@@ -134,6 +121,19 @@
         "abnormal_flag": "Normal",
         "priority": "routine",
         "cost": "$38.75"
+      },
+      {
+        "test_code": "TEST005",
+        "test_name": "White Blood Cell Count",
+        "result": {
+          "value": "7.8",
+          "unit": "K/uL",
+          "reference_range": "4.5-11.0"
+        },
+        "status": "completed",
+        "abnormal_flag": "Normal",
+        "priority": "routine",
+        "cost": "$35.50"
       }
     ]
   }

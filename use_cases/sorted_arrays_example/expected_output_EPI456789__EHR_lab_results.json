@@ -14,7 +14,8 @@
         },
         "status": "completed",
         "abnormal_flag": "Low",
-        "priority": "routine"
+        "priority": "routine",
+        "cost": "$65.00"
       },
       {
         "test_code": "TEST013",
@@ -26,7 +27,8 @@
         },
         "status": "completed",
         "abnormal_flag": "Normal",
-        "priority": "routine"
+        "priority": "routine",
+        "cost": "$58.75"
       }
     ]
   },
@@ -45,7 +47,8 @@
         },
         "status": "completed",
         "abnormal_flag": "Normal",
-        "priority": "routine"
+        "priority": "routine",
+        "cost": "$82.50"
       },
       {
         "test_code": "TEST010",
@@ -57,7 +60,8 @@
         },
         "status": "completed",
         "abnormal_flag": "Normal",
-        "priority": "routine"
+        "priority": "routine",
+        "cost": "$78.00"
       }
     ]
   }

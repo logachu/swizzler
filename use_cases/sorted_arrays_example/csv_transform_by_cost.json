@@ -30,8 +30,8 @@
           }
         ],
         "sort_by": {
-          "field": "result.value",
-          "order": "asc"
+          "field": "cost",
+          "order": "ascending"
         }
       }
     }

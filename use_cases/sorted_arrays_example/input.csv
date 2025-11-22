@@ -1,14 +1,14 @@
-EPI,lab_order_id,order_date,provider_name,test_code,test_name,result_value,result_unit,reference_range,status,abnormal_flag,priority
-EPI789012,LAB003,2025-08-15,Dr. Emily Rodriguez,TEST007,Hemoglobin,14.2,g/dL,12.0-16.0,completed,Normal,routine
-EPI789012,LAB003,2025-08-15,Dr. Emily Rodriguez,TEST005,White Blood Cell Count,7.8,K/uL,4.5-11.0,completed,Normal,routine
-EPI789012,LAB003,2025-08-15,Dr. Emily Rodriguez,TEST009,Platelet Count,245,K/uL,150-400,completed,Normal,routine
-EPI789012,LAB001,2025-10-20,Dr. Sarah Johnson,TEST002,Glucose,118,mg/dL,70-100,completed,High,stat
-EPI789012,LAB001,2025-10-20,Dr. Sarah Johnson,TEST001,Cholesterol,220,mg/dL,<200,completed,High,stat
-EPI789012,LAB001,2025-10-20,Dr. Sarah Johnson,TEST003,Triglycerides,95,mg/dL,<150,completed,Normal,stat
-EPI789012,LAB002,2025-09-10,Dr. Michael Chen,TEST004,Creatinine,0.9,mg/dL,0.6-1.2,completed,Normal,routine
-EPI789012,LAB002,2025-09-10,Dr. Michael Chen,TEST006,Sodium,140,mEq/L,136-145,completed,Normal,routine
-EPI789012,LAB002,2025-09-10,Dr. Michael Chen,TEST008,Potassium,4.2,mEq/L,3.5-5.0,completed,Normal,routine
-EPI456789,LAB004,2025-07-22,Dr. Jennifer Lee,TEST010,TSH,2.5,mIU/L,0.4-4.0,completed,Normal,routine
-EPI456789,LAB004,2025-07-22,Dr. Jennifer Lee,TEST011,Free T4,1.3,ng/dL,0.8-1.8,completed,Normal,routine
-EPI456789,LAB005,2025-11-05,Dr. David Park,TEST012,Vitamin D,28,ng/mL,30-100,completed,Low,routine
-EPI456789,LAB005,2025-11-05,Dr. David Park,TEST013,Vitamin B12,450,pg/mL,200-900,completed,Normal,routine
+EPI,lab_order_id,order_date,provider_name,test_code,test_name,result_value,result_unit,reference_range,status,abnormal_flag,priority,cost
+EPI789012,LAB003,2025-08-15,Dr. Emily Rodriguez,TEST007,Hemoglobin,14.2,g/dL,12.0-16.0,completed,Normal,routine,$45.00
+EPI789012,LAB003,2025-08-15,Dr. Emily Rodriguez,TEST005,White Blood Cell Count,7.8,K/uL,4.5-11.0,completed,Normal,routine,$35.50
+EPI789012,LAB003,2025-08-15,Dr. Emily Rodriguez,TEST009,Platelet Count,245,K/uL,150-400,completed,Normal,routine,$38.75
+EPI789012,LAB001,2025-10-20,Dr. Sarah Johnson,TEST002,Glucose,118,mg/dL,70-100,completed,High,stat,$125.00
+EPI789012,LAB001,2025-10-20,Dr. Sarah Johnson,TEST001,Cholesterol,220,mg/dL,<200,completed,High,stat,$89.99
+EPI789012,LAB001,2025-10-20,Dr. Sarah Johnson,TEST003,Triglycerides,95,mg/dL,<150,completed,Normal,stat,$95.50
+EPI789012,LAB002,2025-09-10,Dr. Michael Chen,TEST004,Creatinine,0.9,mg/dL,0.6-1.2,completed,Normal,routine,$52.00
+EPI789012,LAB002,2025-09-10,Dr. Michael Chen,TEST006,Sodium,140,mEq/L,136-145,completed,Normal,routine,$42.50
+EPI789012,LAB002,2025-09-10,Dr. Michael Chen,TEST008,Potassium,4.2,mEq/L,3.5-5.0,completed,Normal,routine,$44.25
+EPI456789,LAB004,2025-07-22,Dr. Jennifer Lee,TEST010,TSH,2.5,mIU/L,0.4-4.0,completed,Normal,routine,$78.00
+EPI456789,LAB004,2025-07-22,Dr. Jennifer Lee,TEST011,Free T4,1.3,ng/dL,0.8-1.8,completed,Normal,routine,$82.50
+EPI456789,LAB005,2025-11-05,Dr. David Park,TEST012,Vitamin D,28,ng/mL,30-100,completed,Low,routine,$65.00
+EPI456789,LAB005,2025-11-05,Dr. David Park,TEST013,Vitamin B12,450,pg/mL,200-900,completed,Normal,routine,$58.75

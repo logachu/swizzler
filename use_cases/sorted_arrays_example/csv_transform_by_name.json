@@ -7,7 +7,7 @@
     "group_by": "lab_order_id",
     "sort_by": {
       "field": "order_date",
-      "order": "descending"
+      "order": "desc"
     },
     "template": {
       "lab_order_id": "{lab_order_id}",
@@ -30,8 +30,8 @@
           }
         ],
         "sort_by": {
-          "field": "result.value",
-          "order": "asc"
+          "field": "test_name",
+          "order": "ascending"
         }
       }
     }
