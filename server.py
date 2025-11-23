@@ -342,6 +342,114 @@ class ExpressionParser:
 
 
 # ============================================================================
+# Condition Evaluator
+# ============================================================================
+
+class ConditionEvaluator:
+    """Evaluates conditional expressions for template logic."""
+
+    def __init__(self, jsonpath: JSONPathEngine, compute: ComputeFunctions, expr_parser: 'ExpressionParser'):
+        self.jsonpath = jsonpath
+        self.compute = compute
+        self.expr_parser = expr_parser
+
+    def evaluate_condition(self, condition: str, data: Any, variables: Optional[Dict[str, str]] = None) -> bool:
+        """
+        Evaluate a condition expression.
+
+        Supports:
+        - Comparisons: ==, !=, >, <, >=, <=
+        - Logical: &&, ||, !
+        - Functions: len(), sum(), days_from_now(), etc.
+
+        Args:
+            condition: Condition expression (e.g., "$.amount > 0", "len($.items) < 2")
+            data: Data context
+            variables: Optional path variables
+
+        Returns:
+            Boolean result
+        """
+        condition = condition.strip()
+
+        # Handle logical OR (||)
+        if "||" in condition:
+            parts = condition.split("||")
+            return any(self.evaluate_condition(part.strip(), data, variables) for part in parts)
+
+        # Handle logical AND (&&)
+        if "&&" in condition:
+            parts = condition.split("&&")
+            return all(self.evaluate_condition(part.strip(), data, variables) for part in parts)
+
+        # Handle logical NOT (!)
+        if condition.startswith("!"):
+            return not self.evaluate_condition(condition[1:].strip(), data, variables)
+
+        # Handle comparison operators
+        for op in ["==", "!=", ">=", "<=", ">", "<"]:
+            if op in condition:
+                parts = condition.split(op, 1)
+                if len(parts) == 2:
+                    left_val = self.evaluate_value(parts[0].strip(), data, variables)
+                    right_val = self.evaluate_value(parts[1].strip(), data, variables)
+
+                    # Compare
+                    if op == "==":
+                        return left_val == right_val
+                    elif op == "!=":
+                        return left_val != right_val
+                    elif op == ">":
+                        return float(left_val) > float(right_val)
+                    elif op == "<":
+                        return float(left_val) < float(right_val)
+                    elif op == ">=":
+                        return float(left_val) >= float(right_val)
+                    elif op == "<=":
+                        return float(left_val) <= float(right_val)
+
+        # Simple boolean expression - evaluate and check truthiness
+        val = self.evaluate_value(condition, data, variables)
+        return bool(val)
+
+    def evaluate_value(self, expr: str, data: Any, variables: Optional[Dict[str, str]] = None) -> Any:
+        """
+        Evaluate an expression to get its value.
+
+        Args:
+            expr: Expression (e.g., "$.field", "len($.items)", "42", "'text'")
+            data: Data context
+            variables: Optional path variables
+
+        Returns:
+            Evaluated value
+        """
+        expr = expr.strip()
+
+        # String literal
+        if (expr.startswith("'") and expr.endswith("'")) or (expr.startswith('"') and expr.endswith('"')):
+            return expr[1:-1]
+
+        # Numeric literal
+        try:
+            if "." in expr:
+                return float(expr)
+            else:
+                return int(expr)
+        except ValueError:
+            pass
+
+        # Boolean literals
+        if expr.lower() == "true":
+            return True
+        if expr.lower() == "false":
+            return False
+
+        # Otherwise, evaluate as an expression (JSONPath or function call)
+        return self.expr_parser.evaluate_expression(expr, data, variables)
+
+
+# ============================================================================
 # Card Renderer
 # ============================================================================
 
@@ -354,6 +462,7 @@ class CardRenderer:
         self.jsonpath = JSONPathEngine()
         self.compute = ComputeFunctions()
         self.expr_parser = ExpressionParser(self.jsonpath, self.compute)
+        self.condition_evaluator = ConditionEvaluator(self.jsonpath, self.compute, self.expr_parser)
 
     def render_cards(
         self,
@@ -514,8 +623,10 @@ class CardRenderer:
             if isinstance(referenced_template, str):
                 # It's a string template, evaluate it
                 return self.evaluate_field_value(referenced_template, data, variables, templates)
+            elif isinstance(referenced_template, dict):
+                # It's a dict (conditional template)
+                return self.evaluate_conditional_template(referenced_template, data, variables, templates)
             else:
-                # It's a dict (conditional template), will handle in Operation 4
                 return str(referenced_template)
 
         # Otherwise, expand any @template_name references in the string, then evaluate
@@ -559,11 +670,74 @@ class CardRenderer:
             # Recursively evaluate the referenced template
             if isinstance(referenced_template, str):
                 return self.evaluate_field_value(referenced_template, data, variables, templates)
+            elif isinstance(referenced_template, dict):
+                # Dict template (conditional)
+                return self.evaluate_conditional_template(referenced_template, data, variables, templates)
             else:
-                # Dict template (conditional), will handle in Operation 4
                 return str(referenced_template)
 
         return template_ref_pattern.sub(replace_template_ref, text)
+
+    def evaluate_conditional_template(
+        self,
+        conditional: Dict[str, Any],
+        data: Any,
+        variables: Optional[Dict[str, str]] = None,
+        templates: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """
+        Evaluate a conditional template.
+
+        Supports:
+        - Simple conditional: {"condition": "...", "if_true": "...", "if_false": "..."}
+        - Optional conditional: {"condition": "...", "if_true": "..."}
+        - Multi-condition: {"conditions": [{when: "...", show: "..."}], "default": "..."}
+
+        Args:
+            conditional: Conditional template dict
+            data: Data context
+            variables: Optional path variables
+            templates: Templates dict
+
+        Returns:
+            Evaluated string result
+        """
+        if templates is None:
+            templates = {}
+
+        # Multi-condition format
+        if "conditions" in conditional:
+            conditions_list = conditional["conditions"]
+            for cond_item in conditions_list:
+                when_expr = cond_item.get("when")
+                show_template = cond_item.get("show")
+
+                if when_expr and self.condition_evaluator.evaluate_condition(when_expr, data, variables):
+                    # This condition matches, evaluate its template
+                    return self.evaluate_field_value(show_template, data, variables, templates)
+
+            # No condition matched, use default if provided
+            default_template = conditional.get("default", "")
+            return self.evaluate_field_value(default_template, data, variables, templates)
+
+        # Simple conditional format
+        elif "condition" in conditional:
+            condition_expr = conditional["condition"]
+            if_true_template = conditional.get("if_true", "")
+            if_false_template = conditional.get("if_false", "")
+
+            if self.condition_evaluator.evaluate_condition(condition_expr, data, variables):
+                return self.evaluate_field_value(if_true_template, data, variables, templates)
+            else:
+                # if_false might be omitted for optional conditionals
+                if if_false_template:
+                    return self.evaluate_field_value(if_false_template, data, variables, templates)
+                else:
+                    return ""  # Return empty string if no if_false
+
+        # Invalid conditional format
+        else:
+            raise ValueError(f"Invalid conditional template: must have 'condition' or 'conditions' field")
 
 
 # ============================================================================

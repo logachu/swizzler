@@ -197,6 +197,64 @@ class TestOperation2TemplateReference:
 
 
 # ============================================================================
+# Operation 4: Conditional Include Tests
+# ============================================================================
+
+class TestOperation4ConditionalInclude:
+    """Test conditional templates with if/else logic."""
+
+    def test_simple_conditional_if_true(self, card_renderer):
+        """Test simple conditional when condition is true."""
+        cards = card_renderer.render_cards(
+            "operation4_simple_conditional_card.json",
+            "TEST001"
+        )
+
+        # Find card with only 1 refill (Metformin)
+        card = next(c for c in cards if c["title"] == "Metformin")
+        # len($.refills) < 2 is TRUE, so should show if_true
+        assert card["refill_status"] == "⚠️ Low refills - call prescriber"
+
+    def test_simple_conditional_if_false(self, card_renderer):
+        """Test simple conditional when condition is false."""
+        cards = card_renderer.render_cards(
+            "operation4_simple_conditional_card.json",
+            "TEST001"
+        )
+
+        # Find card with 2 refills (Lisinopril)
+        card = next(c for c in cards if c["title"] == "Lisinopril")
+        # len($.refills) < 2 is FALSE, so should show if_false
+        assert card["refill_status"] == "Adequate refills remaining"
+
+    def test_multi_condition_first_match(self, card_renderer):
+        """Test multi-condition selects first matching condition."""
+        # Need to create a card with no refills for this test
+        # For now, test with existing data
+        cards = card_renderer.render_cards(
+            "operation4_multi_conditional_card.json",
+            "TEST001"
+        )
+
+        # Metformin has 1 refill: matches second condition
+        card = next(c for c in cards if c["title"] == "Metformin")
+        assert "🟡" in card["refill_indicator"]
+        assert "1 remaining" in card["refill_indicator"]
+
+    def test_multi_condition_third_match(self, card_renderer):
+        """Test multi-condition with third condition matching."""
+        cards = card_renderer.render_cards(
+            "operation4_multi_conditional_card.json",
+            "TEST001"
+        )
+
+        # Lisinopril has 2 refills: matches third condition
+        card = next(c for c in cards if c["title"] == "Lisinopril")
+        assert "🟢" in card["refill_indicator"]
+        assert "2 refills" in card["refill_indicator"]
+
+
+# ============================================================================
 # Unit Tests for Core Components
 # ============================================================================
 
