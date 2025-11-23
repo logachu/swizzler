@@ -55,34 +55,71 @@ Added support for displaying dates in user-friendly formats in card UI. The `for
 }
 ```
 
-## Future Enhancements
+### ✅ 3. Currency Parsing in CSV-to-JSON Transform (COMPLETED)
 
-### 3. Currency Parsing in CSV-to-JSON Transform
+Added support in our CSV-to-JSON transform format that allows us to describe CSV columns containing numbers as currency amounts in dollars accepting optional dollar signs and decimal points.
 
-Add support in our CSV-to-JSON transform format that allows us to describe CSV columns containing numbers as currency amounts in dollars accepting optional dollar signs and decimal points.
+**Implementation:**
+
+- Added `convert_currency_to_numeric()` function in batch_process.py
+- Updated `cleanse()` function to apply currency type conversion
+- Supports all specified input formats and converts to standardized numeric values
+- Configuration example: `{"column_types": {"amount": {"type": "currency"}}}`
 
 **Supported input formats:**
 
-- `23.4700`
-- `$23.47`
-- `$23`
-- `23`
-- `23.`
-- `.47`
-- `0.47`
-- `$0.47`
+- `23.4700` → 23.47
+- `$23.47` → 23.47
+- `$23` → 23.0
+- `23` → 23.0
+- `23.` → 23.0
+- `.47` → 0.47
+- `0.47` → 0.47
+- `$0.47` → 0.47
 
-**Output:** Standardized numeric format or currency object in JSON document stored in PersonStore
+**Output:** Standardized numeric format stored in JSON document (e.g., 23.47)
 
-### 4. Currency Display Format in Card Configuration JSON
+**Example:**
 
-Add a way to specify a display format for currency amounts in dollars in our card configuration. Shows only two decimal places to right of decimal. Shows comma as thousands separator.
+```json
+{
+  "column_types": {
+    "copay_amount": {
+      "type": "currency"
+    }
+  }
+}
+```
+
+### ✅ 4. Currency Display Format in Card Configuration (COMPLETED)
+
+Added a way to specify a display format for currency amounts in dollars in our card configuration. Shows only two decimal places to right of decimal. Shows comma as thousands separator.
+
+**Implementation:**
+
+- Added `currency()` function to `ComputeFunctions` class in server.py
+- Updated `ExpressionParser` to recognize currency() function calls
+- Formats numeric values with dollar sign, comma thousands separator, and exactly two decimal places
+- Template usage: `{currency($.amount)}`
 
 **Example use case:**
 
-- Database stores: `1089.99000` (numeric)
-- Card config template format: "currency($.amount)"
+- Database stores: `1089.99` (numeric)
+- Card config template: `{currency($.amount)}`
 - UI displays: "$1,089.99"
+
+**Example:**
+
+```json
+{
+  "template": {
+    "copay": "{currency($.costs.copay)}",
+    "total": "{currency($.costs.total)}"
+  }
+}
+```
+
+## Future Enhancements
 
 ### 5. Interactive CSV Transform Configuration Tool
 
