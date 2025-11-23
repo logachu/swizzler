@@ -19,15 +19,16 @@ Add a way to specify a display format for dates in our card configuration to con
 **Example use case:**
 
 - Database stores: "2025-11-23T00:00:00-05:00"
-- Card config specifies format: "MMM DD, YYYY" or "11/23/2025"
+- Card config specifies format: "MMM DD, YYYY" or "MM/DD/YYYY"
 - UI displays: "Nov 23, 2025" or "11/23/2025"
 
 ### 3. Currency Parsing in CSV-to-JSON Transform
-Add support in our CSV-to-JSON transform format that allows us to describe CSV columns with numbers as currency amounts in dollars accepting optional dollar signs and decimal points.
+
+Add support in our CSV-to-JSON transform format that allows us to describe CSV columns containing numbers as currency amounts in dollars accepting optional dollar signs and decimal points.
 
 **Supported input formats:**
 
-- `23.47`
+- `23.4700`
 - `$23.47`
 - `$23`
 - `23`
@@ -36,24 +37,17 @@ Add support in our CSV-to-JSON transform format that allows us to describe CSV c
 - `0.47`
 - `$0.47`
 
-**Output:** Standardized numeric format or currency object in JSON
+**Output:** Standardized numeric format or currency object in JSON document stored in PersonStore
 
-### 4. Currency Display Format in Card Configuration
+### 4. Currency Display Format in Card Configuration JSON
 
-Add a way to specify a display format for currency amounts in dollars in our card configuration.
+Add a way to specify a display format for currency amounts in dollars in our card configuration. Shows only two decimal places to right of decimal. Shows comma as thousands separator.
 
 **Example use case:**
 
-- Database stores: `89.99` (numeric)
-- Card config specifies format: "currency-usd"
-- UI displays: "$89.99"
-
-**Optional enhancements:**
-
-- Support for different currency symbols
-- Configurable decimal places
-- Thousands separators
-- Negative value formatting (e.g., "($10.00)" vs "-$10.00")
+- Database stores: `1089.99000` (numeric)
+- Card config template format: "currency($.amount)"
+- UI displays: "$1,089.99"
 
 ### 5. Interactive CSV Transform Configuration Tool
 
