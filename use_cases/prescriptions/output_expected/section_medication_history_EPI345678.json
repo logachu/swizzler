@@ -7,30 +7,30 @@
             "subtitle": "50mg - once daily",
             "prescriber": "Prescribed by Dr. Patricia Green, Psychiatry",
             "status": "active",
-            "start_date": "Started 2024-05-15",
-            "?end_date": "Ended ",
+            "start_date": "Started May 15, 2024",
+            "end_date": "Ended ",
             "refill_count": "2 refill(s)",
-            "?last_refill": "Last filled 2024-08-13"
+            "last_refill": "Last filled Aug 13, 2024"
         },
         {
             "title": "Losartan",
             "subtitle": "50mg - once daily",
             "prescriber": "Prescribed by Dr. Sarah Johnson, Cardiology",
             "status": "active",
-            "start_date": "Started 2024-07-01",
-            "?end_date": "Ended ",
+            "start_date": "Started Jul 01, 2024",
+            "end_date": "Ended ",
             "refill_count": "2 refill(s)",
-            "?last_refill": "Last filled 2024-09-29"
+            "last_refill": "Last filled Sep 29, 2024"
         },
         {
             "title": "Vitamin D3",
             "subtitle": "2000IU - once daily",
             "prescriber": "Prescribed by Dr. Lisa Martinez, Primary Care",
             "status": "active",
-            "start_date": "Started 2024-06-01",
-            "?end_date": "Ended ",
+            "start_date": "Started Jun 01, 2024",
+            "end_date": "Ended ",
             "refill_count": "2 refill(s)",
-            "?last_refill": "Last filled 2024-08-30"
+            "last_refill": "Last filled Aug 30, 2024"
         }
     ]
 }

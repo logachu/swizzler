@@ -1,0 +1,18 @@
+{
+  "attribute": "_EHR/prescriptions",
+  "foreach": "$[*]",
+  "filter_by": {
+    "field": "status",
+    "value": "active"
+  },
+  "templates": {
+    "root": {
+      "title": "{$.medication_name}",
+      "subtitle": "{$.dosage} - {$.frequency}",
+      "prescriber": "{$.prescriber.name}, {$.prescriber.specialty}",
+      "refill_count": "{len($.refills)}",
+      "?last_refill": "{format_date($.refills[-1].refill_date, '%b %d, %Y')}",
+      "status": "{$.status}"
+    }
+  }
+}

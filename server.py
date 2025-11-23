@@ -235,7 +235,128 @@ class ExpressionParser:
         self.jsonpath = jsonpath_engine
         self.compute = compute_funcs
 
-    def evaluate_expression(self, expr: str, data: Any, variables: Optional[Dict[str, str]] = None) -> Any:
+    @staticmethod
+    def split_function_args(arg_str: str) -> List[str]:
+        """
+        Split function arguments by comma, respecting quoted strings.
+
+        Example: "$.field, 'value, with comma'" -> ["$.field", "'value, with comma'"]
+        """
+        args = []
+        current_arg = []
+        in_quote = False
+        quote_char = None
+
+        for char in arg_str:
+            if char in ('"', "'") and not in_quote:
+                in_quote = True
+                quote_char = char
+                current_arg.append(char)
+            elif char == quote_char and in_quote:
+                in_quote = False
+                quote_char = None
+                current_arg.append(char)
+            elif char == ',' and not in_quote:
+                args.append(''.join(current_arg).strip())
+                current_arg = []
+            else:
+                current_arg.append(char)
+
+        # Add the last argument
+        if current_arg:
+            args.append(''.join(current_arg).strip())
+
+        return args
+
+    def evaluate_pipe_expression(
+        self,
+        expr: str,
+        data: Any,
+        variables: Optional[Dict[str, str]] = None,
+        templates: Optional[Dict[str, Any]] = None,
+        card_renderer: Optional['CardRenderer'] = None
+    ) -> str:
+        """
+        Evaluate a pipe expression: {$.array|@template|separator=', '}
+
+        Args:
+            expr: Pipe expression (e.g., "$.procedures|@procedure_item|separator=', '")
+            data: Data context
+            variables: Optional path variables
+            templates: Templates dict
+            card_renderer: CardRenderer for template application
+
+        Returns:
+            Joined string result
+        """
+        if not templates or not card_renderer:
+            return str(expr)
+
+        # Split by pipe, respecting quotes
+        parts = [p.strip() for p in expr.split('|')]
+
+        if len(parts) < 2:
+            return str(expr)
+
+        # First part is the array path
+        array_path = parts[0]
+
+        # Second part is the template reference
+        template_ref = parts[1]
+        if not template_ref.startswith('@'):
+            return str(expr)  # Invalid format
+
+        template_name = template_ref[1:]  # Remove @
+
+        # Third part (optional) is separator
+        separator = '\n'  # Default separator
+        if len(parts) >= 3:
+            separator_part = parts[2]
+            # Parse separator='...'
+            if '=' in separator_part:
+                _, sep_value = separator_part.split('=', 1)
+                separator = sep_value.strip().strip('"\'')
+                # Handle escape sequences
+                separator = separator.replace('\\n', '\n').replace('\\t', '\t')
+
+        # Evaluate the array path to get the list
+        array_results = self.jsonpath.evaluate(array_path, data, variables)
+        array_data = array_results[0] if array_results else []
+
+        if not isinstance(array_data, list):
+            return str(array_data)
+
+        # Apply template to each item
+        rendered_items = []
+        for item in array_data:
+            # Get the template
+            if template_name not in templates:
+                rendered_items.append(str(item))
+                continue
+
+            template_def = templates[template_name]
+
+            # Render the template for this item
+            if isinstance(template_def, str):
+                # String template - evaluate it
+                rendered = card_renderer.evaluate_field_value(template_def, item, variables, templates)
+                rendered_items.append(rendered)
+            else:
+                # Dict template (conditional) - evaluate it
+                rendered = card_renderer.evaluate_conditional_template(template_def, item, variables, templates)
+                rendered_items.append(rendered)
+
+        # Join with separator
+        return separator.join(rendered_items)
+
+    def evaluate_expression(
+        self,
+        expr: str,
+        data: Any,
+        variables: Optional[Dict[str, str]] = None,
+        templates: Optional[Dict[str, Any]] = None,
+        card_renderer: Optional['CardRenderer'] = None
+    ) -> Any:
         """
         Evaluate a single expression (content within {}).
 
@@ -243,11 +364,17 @@ class ExpressionParser:
             expr: Expression string (e.g., "$.field" or "len($.array)")
             data: Data context
             variables: Optional path variables
+            templates: Optional templates dict for pipe operator
+            card_renderer: Optional CardRenderer for template application
 
         Returns:
             Evaluated value
         """
         expr = expr.strip()
+
+        # Check if it's a pipe operator expression ($.array|@template)
+        if '|' in expr and card_renderer:
+            return self.evaluate_pipe_expression(expr, data, variables, templates, card_renderer)
 
         # Check if it's a function call
         func_match = self.FUNC_PATTERN.match(expr)
@@ -270,12 +397,14 @@ class ExpressionParser:
                 return self.compute.sum(arg_value)
             elif func_name == "format_date":
                 # format_date takes two arguments
-                args = [a.strip().strip('"\'') for a in arg_expr.split(',')]
+                args = self.split_function_args(arg_expr)
                 if len(args) == 2:
                     # First arg is JSONPath, second is format string
                     date_results = self.jsonpath.evaluate(args[0], data, variables)
                     date_val = date_results[0] if date_results else ""
-                    return self.compute.format_date(str(date_val), args[1])
+                    # Strip quotes from format string
+                    format_str = args[1].strip('"\'')
+                    return self.compute.format_date(str(date_val), format_str)
                 return arg_value
             elif func_name == "days_from_now":
                 return self.compute.days_from_now(str(arg_value))
@@ -301,10 +430,21 @@ class ExpressionParser:
                 results = self.jsonpath.evaluate(expr, data, variables)
                 return results[0] if results else ""
 
+        # Check if it's a parameter reference (for parameterized templates)
+        if variables and expr in variables:
+            return variables[expr]
+
         # Literal value
         return expr
 
-    def evaluate_template_string(self, template: str, data: Any, variables: Optional[Dict[str, str]] = None) -> str:
+    def evaluate_template_string(
+        self,
+        template: str,
+        data: Any,
+        variables: Optional[Dict[str, str]] = None,
+        templates: Optional[Dict[str, Any]] = None,
+        card_renderer: Optional['CardRenderer'] = None
+    ) -> str:
         """
         Evaluate a template string with embedded {expressions}.
 
@@ -312,16 +452,126 @@ class ExpressionParser:
             template: Template string (e.g., "Date: {$.date} at {$.time}")
             data: Data context
             variables: Optional path variables
+            templates: Optional templates dict for pipe operator
+            card_renderer: Optional CardRenderer for template application
 
         Returns:
             String with all expressions evaluated and substituted
         """
         def replace_expr(match: Match[str]) -> str:
             expr = match.group(1)
-            value = self.evaluate_expression(expr, data, variables)
+            value = self.evaluate_expression(expr, data, variables, templates, card_renderer)
             return str(value) if value is not None else ""
 
         return self.EXPR_PATTERN.sub(replace_expr, template)
+
+
+# ============================================================================
+# Condition Evaluator
+# ============================================================================
+
+class ConditionEvaluator:
+    """Evaluates conditional expressions for template logic."""
+
+    def __init__(self, jsonpath: JSONPathEngine, compute: ComputeFunctions, expr_parser: 'ExpressionParser'):
+        self.jsonpath = jsonpath
+        self.compute = compute
+        self.expr_parser = expr_parser
+
+    def evaluate_condition(self, condition: str, data: Any, variables: Optional[Dict[str, str]] = None) -> bool:
+        """
+        Evaluate a condition expression.
+
+        Supports:
+        - Comparisons: ==, !=, >, <, >=, <=
+        - Logical: &&, ||, !
+        - Functions: len(), sum(), days_from_now(), etc.
+
+        Args:
+            condition: Condition expression (e.g., "$.amount > 0", "len($.items) < 2")
+            data: Data context
+            variables: Optional path variables
+
+        Returns:
+            Boolean result
+        """
+        condition = condition.strip()
+
+        # Handle logical OR (||)
+        if "||" in condition:
+            parts = condition.split("||")
+            return any(self.evaluate_condition(part.strip(), data, variables) for part in parts)
+
+        # Handle logical AND (&&)
+        if "&&" in condition:
+            parts = condition.split("&&")
+            return all(self.evaluate_condition(part.strip(), data, variables) for part in parts)
+
+        # Handle logical NOT (!)
+        if condition.startswith("!"):
+            return not self.evaluate_condition(condition[1:].strip(), data, variables)
+
+        # Handle comparison operators
+        for op in ["==", "!=", ">=", "<=", ">", "<"]:
+            if op in condition:
+                parts = condition.split(op, 1)
+                if len(parts) == 2:
+                    left_val = self.evaluate_value(parts[0].strip(), data, variables)
+                    right_val = self.evaluate_value(parts[1].strip(), data, variables)
+
+                    # Compare
+                    if op == "==":
+                        return left_val == right_val
+                    elif op == "!=":
+                        return left_val != right_val
+                    elif op == ">":
+                        return float(left_val) > float(right_val)
+                    elif op == "<":
+                        return float(left_val) < float(right_val)
+                    elif op == ">=":
+                        return float(left_val) >= float(right_val)
+                    elif op == "<=":
+                        return float(left_val) <= float(right_val)
+
+        # Simple boolean expression - evaluate and check truthiness
+        val = self.evaluate_value(condition, data, variables)
+        return bool(val)
+
+    def evaluate_value(self, expr: str, data: Any, variables: Optional[Dict[str, str]] = None) -> Any:
+        """
+        Evaluate an expression to get its value.
+
+        Args:
+            expr: Expression (e.g., "$.field", "len($.items)", "42", "'text'")
+            data: Data context
+            variables: Optional path variables
+
+        Returns:
+            Evaluated value
+        """
+        expr = expr.strip()
+
+        # String literal
+        if (expr.startswith("'") and expr.endswith("'")) or (expr.startswith('"') and expr.endswith('"')):
+            return expr[1:-1]
+
+        # Numeric literal
+        try:
+            if "." in expr:
+                return float(expr)
+            else:
+                return int(expr)
+        except ValueError:
+            pass
+
+        # Boolean literals
+        if expr.lower() == "true":
+            return True
+        if expr.lower() == "false":
+            return False
+
+        # Otherwise, evaluate as an expression (JSONPath or function call)
+        return self.expr_parser.evaluate_expression(expr, data, variables)
 
 
 # ============================================================================
@@ -337,6 +587,7 @@ class CardRenderer:
         self.jsonpath = JSONPathEngine()
         self.compute = ComputeFunctions()
         self.expr_parser = ExpressionParser(self.jsonpath, self.compute)
+        self.condition_evaluator = ConditionEvaluator(self.jsonpath, self.compute, self.expr_parser)
 
     def render_cards(
         self,
@@ -366,7 +617,17 @@ class CardRenderer:
         foreach_expr = card_config.get("foreach", "$")
         filter_by = card_config.get("filter_by")
         extract = card_config.get("extract")
-        template = card_config.get("template", {})
+
+        # Support both old "template" and new "templates.root" format
+        if "templates" in card_config:
+            templates = card_config["templates"]
+            if "root" not in templates:
+                raise ValueError(f"Card config '{card_config_name}' has 'templates' but missing 'root' template")
+            template = templates["root"]
+        else:
+            # Backward compatibility with old "template" format
+            template = card_config.get("template", {})
+            templates = {}  # Empty templates dict for old format
 
         # Load patient attribute data
         attribute_data = self.attr_loader.load_attribute(epi, attribute_name)
@@ -398,7 +659,7 @@ class CardRenderer:
         # Render a card for each item
         cards = []
         for item in items:
-            card = self.render_single_card(template, item, variables)
+            card = self.render_single_card(template, item, variables, templates)
             if card:  # Only include if not empty (conditional fields might remove all)
                 cards.append(card)
 
@@ -408,7 +669,8 @@ class CardRenderer:
         self,
         template: Dict[str, Any],
         data: Any,
-        variables: Optional[Dict[str, str]] = None
+        variables: Optional[Dict[str, str]] = None,
+        templates: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Render a single card from template and data.
@@ -417,22 +679,27 @@ class CardRenderer:
             template: Card template dictionary
             data: Data item
             variables: Optional path variables
+            templates: Optional templates dict for template references
 
         Returns:
             Rendered card dictionary
         """
+        if templates is None:
+            templates = {}
+
         card = {}
 
         for field_name, field_value in template.items():
-            # Check if field is conditional (prefixed with ?)
+            # Check if field name is conditional (prefixed with ?)
             is_conditional = False
-            if isinstance(field_value, str) and field_value.startswith("?"):
+            actual_field_name = field_name
+            if field_name.startswith("?"):
                 is_conditional = True
-                field_value = field_value[1:]  # Remove ? prefix
+                actual_field_name = field_name[1:]  # Remove ? prefix from field name
 
             # Evaluate the field value
             if isinstance(field_value, str):
-                rendered_value = self.expr_parser.evaluate_template_string(field_value, data, variables)
+                rendered_value = self.evaluate_field_value(field_value, data, variables, templates)
             else:
                 rendered_value = field_value
 
@@ -441,9 +708,238 @@ class CardRenderer:
                 if not rendered_value or rendered_value == "" or rendered_value == "0":
                     continue  # Skip this field
 
-            card[field_name] = rendered_value
+            card[actual_field_name] = rendered_value
 
         return card
+
+    def evaluate_field_value(
+        self,
+        field_value: str,
+        data: Any,
+        variables: Optional[Dict[str, str]] = None,
+        templates: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """
+        Evaluate a field value, handling template references.
+
+        Args:
+            field_value: The template string or template reference
+            data: Data context
+            variables: Optional path variables
+            templates: Templates dict for resolving references
+
+        Returns:
+            Evaluated value
+        """
+        if templates is None:
+            templates = {}
+
+        # Check if it's a pure template reference (@template_name with no other content)
+        if field_value.startswith("@") and " " not in field_value and "\n" not in field_value:
+            template_name = field_value[1:]  # Remove @ prefix
+
+            # Look up the template
+            if template_name not in templates:
+                raise ValueError(f"Template reference '@{template_name}' not found in templates")
+
+            referenced_template = templates[template_name]
+
+            # Recursively evaluate the referenced template
+            if isinstance(referenced_template, str):
+                # It's a string template, evaluate it
+                return self.evaluate_field_value(referenced_template, data, variables, templates)
+            elif isinstance(referenced_template, dict):
+                # It's a dict (conditional template)
+                return self.evaluate_conditional_template(referenced_template, data, variables, templates)
+            else:
+                return str(referenced_template)
+
+        # Otherwise, expand any @template_name references in the string, then evaluate
+        expanded_value = self.expand_template_references(field_value, data, variables, templates)
+        return self.expr_parser.evaluate_template_string(expanded_value, data, variables, templates, self)
+
+    def expand_template_references(
+        self,
+        text: str,
+        data: Any,
+        variables: Optional[Dict[str, str]] = None,
+        templates: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """
+        Expand all @template_name references in a string.
+
+        Args:
+            text: Text containing possible template references
+            data: Data context
+            variables: Optional path variables
+            templates: Templates dict
+
+        Returns:
+            Text with all @template_name references expanded
+        """
+        if templates is None:
+            templates = {}
+
+        # Pattern to match @template_name or @template_name(args)
+        # But NOT when preceded by | (pipe operator for list application)
+        import re
+        template_ref_pattern = re.compile(r'(?<!\|)@(\w+)(?:\((.*?)\))?')
+
+        def replace_template_ref(match: Match[str]) -> str:
+            template_name = match.group(1)
+            args_str = match.group(2)  # May be None if no arguments
+
+            # Look up the template - check both with and without parameters
+            referenced_template = None
+            template_key = None
+            param_names = []
+
+            # First, try to find a parameterized version
+            if args_str is not None:
+                # Look for "template_name(param1, param2, ...)" in templates
+                for key in templates.keys():
+                    if key.startswith(f"{template_name}(") and key.endswith(")"):
+                        # Extract parameter names from key
+                        param_part = key[len(template_name)+1:-1]  # Remove "template_name(" and ")"
+                        param_names = [p.strip() for p in param_part.split(',')]
+                        referenced_template = templates[key]
+                        template_key = key
+                        break
+
+            # If not found, try non-parameterized version
+            if referenced_template is None and template_name in templates:
+                referenced_template = templates[template_name]
+                template_key = template_name
+
+            if referenced_template is None:
+                raise ValueError(f"Template reference '@{template_name}' not found in templates")
+
+            # If we have arguments, bind them to parameters
+            param_values = {}
+            if args_str and param_names:
+                # Parse and evaluate arguments
+                arg_exprs = self.expr_parser.split_function_args(args_str)
+
+                if len(arg_exprs) != len(param_names):
+                    raise ValueError(f"Template '{template_key}' expects {len(param_names)} arguments, got {len(arg_exprs)}")
+
+                for param_name, arg_expr in zip(param_names, arg_exprs):
+                    # Evaluate the argument expression
+                    arg_value = self.evaluate_argument(arg_expr, data, variables)
+                    param_values[param_name] = str(arg_value)
+
+            # Recursively evaluate the referenced template with bound parameters
+            if isinstance(referenced_template, str):
+                return self.evaluate_field_value(referenced_template, data, param_values if param_values else variables, templates)
+            elif isinstance(referenced_template, dict):
+                # Dict template (conditional)
+                return self.evaluate_conditional_template(referenced_template, data, param_values if param_values else variables, templates)
+            else:
+                return str(referenced_template)
+
+        return template_ref_pattern.sub(replace_template_ref, text)
+
+    def evaluate_argument(
+        self,
+        arg_expr: str,
+        data: Any,
+        variables: Optional[Dict[str, str]] = None
+    ) -> Any:
+        """
+        Evaluate an argument expression for parameterized templates.
+
+        Args:
+            arg_expr: Argument expression (e.g., "$.field" or "'literal'")
+            data: Data context
+            variables: Optional path variables
+
+        Returns:
+            Evaluated value
+        """
+        arg_expr = arg_expr.strip()
+
+        # String literal
+        if (arg_expr.startswith("'") and arg_expr.endswith("'")) or \
+           (arg_expr.startswith('"') and arg_expr.endswith('"')):
+            return arg_expr[1:-1]
+
+        # Numeric literal
+        try:
+            if "." in arg_expr:
+                return float(arg_expr)
+            else:
+                return int(arg_expr)
+        except ValueError:
+            pass
+
+        # JSONPath or expression
+        if arg_expr.startswith("$"):
+            results = self.jsonpath.evaluate(arg_expr, data, variables)
+            return results[0] if results else ""
+
+        # Otherwise, treat as literal
+        return arg_expr
+
+    def evaluate_conditional_template(
+        self,
+        conditional: Dict[str, Any],
+        data: Any,
+        variables: Optional[Dict[str, str]] = None,
+        templates: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """
+        Evaluate a conditional template.
+
+        Supports:
+        - Simple conditional: {"condition": "...", "if_true": "...", "if_false": "..."}
+        - Optional conditional: {"condition": "...", "if_true": "..."}
+        - Multi-condition: {"conditions": [{when: "...", show: "..."}], "default": "..."}
+
+        Args:
+            conditional: Conditional template dict
+            data: Data context
+            variables: Optional path variables
+            templates: Templates dict
+
+        Returns:
+            Evaluated string result
+        """
+        if templates is None:
+            templates = {}
+
+        # Multi-condition format
+        if "conditions" in conditional:
+            conditions_list = conditional["conditions"]
+            for cond_item in conditions_list:
+                when_expr = cond_item.get("when")
+                show_template = cond_item.get("show")
+
+                if when_expr and self.condition_evaluator.evaluate_condition(when_expr, data, variables):
+                    # This condition matches, evaluate its template
+                    return self.evaluate_field_value(show_template, data, variables, templates)
+
+            # No condition matched, use default if provided
+            default_template = conditional.get("default", "")
+            return self.evaluate_field_value(default_template, data, variables, templates)
+
+        # Simple conditional format
+        elif "condition" in conditional:
+            condition_expr = conditional["condition"]
+            if_true_template = conditional.get("if_true", "")
+            if_false_template = conditional.get("if_false", "")
+
+            if self.condition_evaluator.evaluate_condition(condition_expr, data, variables):
+                return self.evaluate_field_value(if_true_template, data, variables, templates)
+            else:
+                # if_false might be omitted for optional conditionals
+                if if_false_template:
+                    return self.evaluate_field_value(if_false_template, data, variables, templates)
+                else:
+                    return ""  # Return empty string if no if_false
+
+        # Invalid conditional format
+        else:
+            raise ValueError(f"Invalid conditional template: must have 'condition' or 'conditions' field")
 
 
 # ============================================================================

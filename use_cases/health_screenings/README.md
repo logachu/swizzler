@@ -130,3 +130,24 @@ This example demonstrates these compute functions:
 | `days_after(date)` | Days since a date | `days_after($.due_date)` → `526` |
 | `format_date(date, format)` | Format date for display | `format_date($.due_date, '%b %d, %Y')` → `"Jun 15, 2024"` |
 | `days_from_now(date)` | Relative date string | `days_from_now($.due_date)` → `"526 days ago"` |
+## Card Template Usage
+
+The `health_screening_card.json` template demonstrates several compute functions:
+
+```json
+{
+  "title": "{$.screening_type}",
+  "subtitle": "Due date: {format_date($.due_date, '%b %d, %Y')}",
+  "status": "{$.status}",
+  "?overdue_message": "You are {days_after($.due_date)} days overdue",
+  "last_completed": "Last completed: {format_date($.last_completed_date, '%b %d, %Y')}"
+}
+```
+
+## Compute Functions
+
+| Function | Purpose | Example |
+|----------|---------|---------|
+| `format_date(date, format)` | Format date for display | `format_date($.due_date, '%b %d, %Y')` → `"Jun 15, 2024"` |
+| `days_after(date)` | Days since a date | `days_after($.due_date)` → `526` |
+| `days_from_now(date)` | Relative date string | `days_from_now($.due_date)` → `"526 days ago"` |

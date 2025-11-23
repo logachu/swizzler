@@ -1,0 +1,15 @@
+{
+  "attribute": "_EHR/prescriptions",
+  "foreach": "$[*]",
+  "templates": {
+    "root": {
+      "title": "{$.medication_name}",
+      "refill_status": "@refill_warning"
+    },
+    "refill_warning": {
+      "condition": "len($.refills) < 2",
+      "if_true": "⚠️ Low refills - call prescriber",
+      "if_false": "Adequate refills remaining"
+    }
+  }
+}

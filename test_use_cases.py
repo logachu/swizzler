@@ -126,9 +126,9 @@ class ServerTester:
         # Get absolute path to project root
         project_root = Path(__file__).parent.absolute()
 
-        # Activate venv and start server
+        # Start server using system Python
         self.server_process = subprocess.Popen(
-            ["bash", "-c", f"{project_root}/venv/bin/python3.13 {project_root}/server.py"],
+            ["python3", f"{project_root}/server.py"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )

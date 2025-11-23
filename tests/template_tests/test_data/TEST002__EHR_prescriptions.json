@@ -1,0 +1,10 @@
+[
+  {
+    "medication_name": "Lisinopril",
+    "procedures": [
+      {"name": "Blood Pressure Check", "status": "completed"},
+      {"name": "EKG", "status": "scheduled"},
+      {"name": "Blood Work", "status": "completed"}
+    ]
+  }
+]

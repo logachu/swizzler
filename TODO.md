@@ -120,6 +120,38 @@ Create a comprehensive tutorial series that teaches the system to new developers
 - Serves as living documentation
 - Provides reusable templates for common scenarios
 
+### 7. Text Formatting in Templates
+Add support for text formatting in card configuration templates to enable richer UI displays with bold text, links, and other formatting.
+
+**Example use cases:**
+- **Bold text**: Emphasize important information like warnings, status badges, or key values
+- **Links**: Add clickable links to phone numbers, websites, or internal navigation
+- **Other formatting**: Italics, underlines, colors for status indicators
+
+**Potential syntax options:**
+- Markdown-style: `**bold text**`, `[link text](url)`
+- HTML-style: `<b>bold text</b>`, `<a href="url">link text</a>`
+- Template functions: `{bold('text')}`, `{link('text', 'url')}`
+
+**Example in templates:**
+```json
+{
+  "templates": {
+    "root": {
+      "title": "**{$.medication_name}**",
+      "pharmacy_contact": "[Call Pharmacy]({$.pharmacy.phone})",
+      "warning": "**⚠️ Refill Needed**"
+    }
+  }
+}
+```
+
+**Benefits:**
+- Richer, more informative UI displays
+- Better visual hierarchy in card layouts
+- Actionable elements (clickable phone numbers, links)
+- Consistent formatting across different data sources
+
 ---
 
 ## Notes
