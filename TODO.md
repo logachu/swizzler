@@ -107,7 +107,10 @@ Create a comprehensive tutorial series that teaches the system to new developers
 
 8. **Advanced Card Features**: Dynamic UI rendering
    - Conditional rendering
-   - Data formatting for display
+   - Compute functions: `len()`, `sum()`, `format_date()`, `days_from_now()`
+   - Counting items: "You have {len($.prescriptions)} active prescriptions"
+   - Summing values: "Total copay: ${sum($.procedures[*].costs.copay)}"
+   - Date formatting and relative dates
    - Building complete card-based interfaces
 
 **Benefits:**
