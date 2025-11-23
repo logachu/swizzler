@@ -412,6 +412,10 @@ class ExpressionParser:
                 results = self.jsonpath.evaluate(expr, data, variables)
                 return results[0] if results else ""
 
+        # Check if it's a parameter reference (for parameterized templates)
+        if variables and expr in variables:
+            return variables[expr]
+
         # Literal value
         return expr
 
@@ -758,29 +762,105 @@ class CardRenderer:
         if templates is None:
             templates = {}
 
-        # Pattern to match @template_name (word characters only)
+        # Pattern to match @template_name or @template_name(args)
         # But NOT when preceded by | (pipe operator for list application)
         import re
-        template_ref_pattern = re.compile(r'(?<!\|)@(\w+)')
+        template_ref_pattern = re.compile(r'(?<!\|)@(\w+)(?:\((.*?)\))?')
 
         def replace_template_ref(match: Match[str]) -> str:
             template_name = match.group(1)
+            args_str = match.group(2)  # May be None if no arguments
 
-            if template_name not in templates:
+            # Look up the template - check both with and without parameters
+            referenced_template = None
+            template_key = None
+            param_names = []
+
+            # First, try to find a parameterized version
+            if args_str is not None:
+                # Look for "template_name(param1, param2, ...)" in templates
+                for key in templates.keys():
+                    if key.startswith(f"{template_name}(") and key.endswith(")"):
+                        # Extract parameter names from key
+                        param_part = key[len(template_name)+1:-1]  # Remove "template_name(" and ")"
+                        param_names = [p.strip() for p in param_part.split(',')]
+                        referenced_template = templates[key]
+                        template_key = key
+                        break
+
+            # If not found, try non-parameterized version
+            if referenced_template is None and template_name in templates:
+                referenced_template = templates[template_name]
+                template_key = template_name
+
+            if referenced_template is None:
                 raise ValueError(f"Template reference '@{template_name}' not found in templates")
 
-            referenced_template = templates[template_name]
+            # If we have arguments, bind them to parameters
+            param_values = {}
+            if args_str and param_names:
+                # Parse and evaluate arguments
+                arg_exprs = self.expr_parser.split_function_args(args_str)
 
-            # Recursively evaluate the referenced template
+                if len(arg_exprs) != len(param_names):
+                    raise ValueError(f"Template '{template_key}' expects {len(param_names)} arguments, got {len(arg_exprs)}")
+
+                for param_name, arg_expr in zip(param_names, arg_exprs):
+                    # Evaluate the argument expression
+                    arg_value = self.evaluate_argument(arg_expr, data, variables)
+                    param_values[param_name] = str(arg_value)
+
+            # Recursively evaluate the referenced template with bound parameters
             if isinstance(referenced_template, str):
-                return self.evaluate_field_value(referenced_template, data, variables, templates)
+                return self.evaluate_field_value(referenced_template, data, param_values if param_values else variables, templates)
             elif isinstance(referenced_template, dict):
                 # Dict template (conditional)
-                return self.evaluate_conditional_template(referenced_template, data, variables, templates)
+                return self.evaluate_conditional_template(referenced_template, data, param_values if param_values else variables, templates)
             else:
                 return str(referenced_template)
 
         return template_ref_pattern.sub(replace_template_ref, text)
+
+    def evaluate_argument(
+        self,
+        arg_expr: str,
+        data: Any,
+        variables: Optional[Dict[str, str]] = None
+    ) -> Any:
+        """
+        Evaluate an argument expression for parameterized templates.
+
+        Args:
+            arg_expr: Argument expression (e.g., "$.field" or "'literal'")
+            data: Data context
+            variables: Optional path variables
+
+        Returns:
+            Evaluated value
+        """
+        arg_expr = arg_expr.strip()
+
+        # String literal
+        if (arg_expr.startswith("'") and arg_expr.endswith("'")) or \
+           (arg_expr.startswith('"') and arg_expr.endswith('"')):
+            return arg_expr[1:-1]
+
+        # Numeric literal
+        try:
+            if "." in arg_expr:
+                return float(arg_expr)
+            else:
+                return int(arg_expr)
+        except ValueError:
+            pass
+
+        # JSONPath or expression
+        if arg_expr.startswith("$"):
+            results = self.jsonpath.evaluate(arg_expr, data, variables)
+            return results[0] if results else ""
+
+        # Otherwise, treat as literal
+        return arg_expr
 
     def evaluate_conditional_template(
         self,

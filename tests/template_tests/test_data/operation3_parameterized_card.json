@@ -1,0 +1,13 @@
+{
+  "attribute": "_EHR/prescriptions",
+  "foreach": "$[*]",
+  "templates": {
+    "root": {
+      "title": "{$.medication_name}",
+      "dosage_info": "@medication_detail($.dosage, $.frequency)",
+      "prescriber_line": "@labeled_field('Prescriber', $.prescriber.name)"
+    },
+    "medication_detail(dose, freq)": "Dosage: {dose}, Frequency: {freq}",
+    "labeled_field(label, value)": "{label}: {value}"
+  }
+}

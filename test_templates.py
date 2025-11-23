@@ -197,6 +197,49 @@ class TestOperation2TemplateReference:
 
 
 # ============================================================================
+# Operation 3: Parameterized Templates Tests
+# ============================================================================
+
+class TestOperation3ParameterizedTemplates:
+    """Test parameterized templates with @template(args) syntax."""
+
+    def test_parameterized_template_basic(self, card_renderer):
+        """Test basic parameterized template with two parameters."""
+        cards = card_renderer.render_cards(
+            "operation3_parameterized_card.json",
+            "TEST001"
+        )
+
+        assert len(cards) == 2
+        card1 = cards[0]  # Lisinopril
+
+        # Should pass $.dosage and $.frequency as parameters
+        assert card1["dosage_info"] == "Dosage: 10mg, Frequency: Once daily"
+
+    def test_parameterized_template_with_literal(self, card_renderer):
+        """Test parameterized template with literal string argument."""
+        cards = card_renderer.render_cards(
+            "operation3_parameterized_card.json",
+            "TEST001"
+        )
+
+        card1 = cards[0]  # Lisinopril
+        # Should pass 'Prescriber' literal and $.prescriber.name as parameters
+        assert card1["prescriber_line"] == "Prescriber: Dr. Sarah Johnson"
+
+    def test_parameterized_template_different_data(self, card_renderer):
+        """Test parameterized template with different data contexts."""
+        cards = card_renderer.render_cards(
+            "operation3_parameterized_card.json",
+            "TEST001"
+        )
+
+        card2 = cards[1]  # Metformin
+        assert card2["dosage_info"] == "Dosage: 500mg, Frequency: Twice daily"
+        assert card2["prescriber_line"] == "Prescriber: Dr. Michael Chen"
+
+
+# ============================================================================
 # Operation 4: Conditional Include Tests
 # ============================================================================
 
