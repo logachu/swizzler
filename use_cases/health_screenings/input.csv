@@ -1,0 +1,7 @@
+EPI,screening_id,screening_type,due_date,last_completed_date,status,recommended_by,frequency,notes
+EPI123456,SCR001,Mammogram,2024-06-15,2023-06-10,overdue,Dr. Sarah Johnson,Annual,Breast cancer screening - age 45+
+EPI123456,SCR002,Colonoscopy,2026-03-20,2021-03-15,scheduled,Dr. Michael Chen,Every 5 years,Routine screening - next due 2026
+EPI123456,SCR003,Blood Pressure Check,2025-11-25,2025-05-20,upcoming,Dr. Sarah Johnson,Every 6 months,Monitor for hypertension
+EPI789012,SCR004,Cholesterol Screening,2025-12-01,2024-12-01,upcoming,Dr. Jennifer Lee,Annual,Lipid panel
+EPI789012,SCR005,Diabetic Eye Exam,2024-08-30,2023-08-25,overdue,Dr. David Park,Annual,Retinopathy screening
+EPI789012,SCR006,Flu Vaccine,2025-10-15,2024-10-10,upcoming,Dr. Jennifer Lee,Annual,Seasonal influenza prevention

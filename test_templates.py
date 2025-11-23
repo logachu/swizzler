@@ -407,6 +407,55 @@ class TestComputeFunctions:
         result = compute.format_date("2025-01-15", "%Y-%m-%d")
         assert result == "2025-01-15"
 
+    def test_days_from_now(self):
+        """Test days_from_now() function."""
+        compute = ComputeFunctions()
+        from datetime import datetime, timedelta
+
+        # Test with today
+        today = datetime.now().strftime("%Y-%m-%d")
+        assert compute.days_from_now(today) == "today"
+
+        # Test with tomorrow
+        tomorrow = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
+        assert compute.days_from_now(tomorrow) == "tomorrow"
+
+        # Test with yesterday
+        yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+        assert compute.days_from_now(yesterday) == "yesterday"
+
+        # Test with future date
+        future = (datetime.now() + timedelta(days=5)).strftime("%Y-%m-%d")
+        assert compute.days_from_now(future) == "5 days from now"
+
+        # Test with past date
+        past = (datetime.now() - timedelta(days=10)).strftime("%Y-%m-%d")
+        assert compute.days_from_now(past) == "10 days ago"
+
+    def test_days_after(self):
+        """Test days_after() function."""
+        compute = ComputeFunctions()
+        from datetime import datetime, timedelta
+
+        # Test with today - should return 0
+        today = datetime.now().strftime("%Y-%m-%d")
+        assert compute.days_after(today) == 0
+
+        # Test with past date - should return positive number
+        past = (datetime.now() - timedelta(days=10)).strftime("%Y-%m-%d")
+        result = compute.days_after(past)
+        assert result == 10  # 10 days overdue
+
+        # Test with future date - should return negative number
+        future = (datetime.now() + timedelta(days=5)).strftime("%Y-%m-%d")
+        result = compute.days_after(future)
+        assert result == -5  # Due in 5 days
+
+        # Test with far past date
+        far_past = (datetime.now() - timedelta(days=100)).strftime("%Y-%m-%d")
+        result = compute.days_after(far_past)
+        assert result == 100  # 100 days overdue
+
 
 class TestExpressionParser:
     """Test expression parsing and evaluation."""
