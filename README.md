@@ -4,39 +4,40 @@ This project contains a proof-of-concept system for transforming CSV data into N
 
 ## Goals
 
-The primary high-level goas is the ability to handle arbitrary data uploaded from customers as CSV files with columns containing custom fields not known to our system.
+The primary high-level goal of this system is the ability for customers to upload arbitrary structured health data as CSV files and display that data in a mobile app UI in customized collections of cards without requiring code changes to deployed on client or server to support new use cases.
 
-To accomplish this high-level goal we have the following sub-goals:
+To accomplish this high-level goal any solution should support:
 
-* Allow nested objects in the data
-* Allow nested _lists_ of objects
-* Allow the display of this arbitrarily structured data in the front-end UI using templates
-  * support formatting dates and currency
-  * support displaying the length of arrays e.g. "you have {person.prescriptions.active.count}" active prescriptions"
-  * support conditional templates
-  * support sums of values e.g. "total cost: ${sum(person.bills[*].total)}
-* Support typed data including dates and currency values
-* Support sorting arrays of objects by field values including all support comparable types: strings dates, currencies
-* Support filtering arrays of objects e.g. filtering only future appointments or active prescriptions
+* Nested objects in the data to any depth
+* Nested _lists_ of objects
+* Importing typed data from CSV including dates and currency values
+* Allow use of configuration to describe where in the UI to display specified fields from this arbitrarily structured data
+  -flexible formatting of dates and currency
+  -displaying count of items in a list e.g. "you have {person.prescriptions.active.count}" active prescriptions"
+  -conditional templates
+  -sums of values e.g. "total cost: ${sum(person.bills[*].amount)}"
+* Sorting arrays of objects by field values including all support comparable types: strings dates, currencies
+* Filtering arrays of objects e.g. filtering only future appointments or active prescriptions
 
 ## Proposed solution
 
-1. CSVs with denormalized data are uploaded
-2. We prepare a schema file to describe data types and now to normalize the nested data. This is used by Databricks to transform CSV to JSON objects to store as Person Store attributes for each patient.
-3. To display the data in in the correct front-end UI element, use JSON Path-like syntax in templates to reference the custom data.
-4. Logic bridge serves this data to clients.
+1. CSVs with denormalized data are uploaded via FTP.
+2. Praia or the customer prepares a schema file to describe data types of CSV columns and now to normalize the nested data.
+3. The schema is used by Databricks to transform CSV to JSON objects to store as Person Store attributes for each patient.
+4. To display the data in the correct front-end UI element, use JSON Path-like syntax in templates in card configuration files to reference the custom data.
+5. Logic bridge resolves templates and serves the strings to populate cards in the mobile clients.
 
 There are multiple solution for serving the data with different tradeoffs. We could fully render templates on server to keep client as simple and future-proof as possible, or send the data as key/value pairs with keys matching the references from templates. We could send sort order with hrefs for each card for the client to use to fetch card data. This allows finer-grained client-side caching and ability to fetch on-demand but more server calls to initially render a card collection.
 
 ## Proof of concept
 
-To demonstrate the feasibility of this solution and workout the formats for the schema and JSONPath-like template references I've prepared a proof of concept demo.
+This project demonstrates the feasibility of this solution with a working solution. This ensures proposed formats for the schema and JSONPath-like template references fulfill the project goals.
 
 ### Components
 
 #### 1. batch_process.py - CSV to JSON Transformer
 
-A CLI tool that transforms denormalized CSV data into nested JSON documents using a declarative configuration format. This emulates a Databricks batch process.
+A CLI tool that transforms denormalized CSV data into JSON documents using a declarative configuration format. This emulates a Databricks batch process.
 
 ##### Usage
 
@@ -55,11 +56,11 @@ python batch_process.py use_cases/price_estimation/price_estimates.csv \
 
 The transformation is controlled by `csv_transform.json`:
 
-```json
+```jsonc
 {
   "attribute": {
-    "name": "_EHR/appointments",
-    "group_by": "EPI"
+    "name": "_EHR/appointments", // PersonStore namespace/attribute
+    "group_by": "EPI" // where EPI is a CSV column header
   },
   "template": {
     "group_by": "appointment_id",
@@ -75,7 +76,7 @@ The transformation is controlled by `csv_transform.json`:
 
 **Key concepts:**
 
-* `group_by`: Groups rows by a column value to create unique objects
+* `group_by`: Groups rows by a common column value to create unique objects
 * `collect`: Gathers all rows as separate array items (allows duplicates)
 * `{column_name}`: References CSV column values
 
@@ -156,10 +157,10 @@ curl -H "X-EPI: EPI123456" http://localhost:8000/section/procedures/APT001
 1. **Simple field access:** `{$.field}` or `{$.nested.field}`
 2. **String formatting:** `{$.date} at {$.time}`
 3. **Compute functions:**
-   * `{len($.array)}` - Count array items
-   * `{sum($.array)}` - Sum numeric values
-   * `{format_date($.date, '%b %d')}` - Format dates
-   * `{days_from_now($.date)}` - Relative date display
+   - `{len($.array)}` - Count array items
+   - `{sum($.array)}` - Sum numeric values
+   - `{format_date($.date, '%b %d')}` - Format dates
+   - `{days_from_now($.date)}` - Relative date display
 4. **Conditional fields:** Prefix with `?` to omit if falsy
 
 **Path Variables:**
