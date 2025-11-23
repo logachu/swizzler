@@ -3,6 +3,13 @@
     "name": "_EHR/appointments",
     "group_by": "EPI"
   },
+  "column_types": {
+    "appointment_date": {
+      "type": "date",
+      "input_format": "%Y-%m-%d",
+      "timezone": "America/New_York"
+    }
+  },
   "template": {
     "group_by": "appointment_id",
     "template": {

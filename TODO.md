@@ -1,26 +1,55 @@
 # Project TODOs
 
+## Completed Enhancements
+
+### ✅ 1. Date Format Conversion in CSV-to-JSON Transform (COMPLETED)
+
+Added support in our CSV-to-JSON transform format that allows us to describe CSV columns with arbitrary date formats that we will convert to ISO-8601 Dates with timezone offset in our simulated PersonStore DB.
+
+**Implementation:**
+
+- Added `column_types` section to csv_transform.json format
+- Supports specifying date columns with `type: "date"`, optional `input_format`, and `timezone`
+- Auto-detects common date formats if input_format not specified
+- Converts dates to ISO-8601 with timezone offset (e.g., "2025-11-23T00:00:00-05:00")
+- Updated batch_process.py with `convert_date_to_iso8601()` function
+
+**Example:**
+
+```json
+{
+  "column_types": {
+    "appointment_date": {
+      "type": "date",
+      "input_format": "%Y-%m-%d",
+      "timezone": "America/New_York"
+    }
+  }
+}
+```
+
+### ✅ 2. Date Display Format in Card Configuration (COMPLETED)
+
+Added support for displaying dates in user-friendly formats in card UI. The `format_date()` function was already implemented and works with both simple date strings and ISO-8601 formatted dates.
+
+**Implementation:**
+
+- `format_date(date_field, format_string)` function available in card templates
+- Updated server.py to handle timezone-aware ISO-8601 dates
+- `days_from_now()` and `days_after()` functions updated to support timezone-aware dates
+
+**Example:**
+
+```json
+{
+  "template": {
+    "datetime": "{format_date($.date, '%b %d')} at {$.time}",
+    "days_until": "{days_from_now($.date)}"
+  }
+}
+```
+
 ## Future Enhancements
-
-### 1. Date Format Conversion in CSV-to-JSON Transform
-
-Add support in our CSV-to-JSON transform format that allows us to describe CSV columns with arbitrary date formats that we will convert to ISO-8601 Dates with timezone offset in our simulated PersonStore DB.
-
-**Example use case:**
-
-- Input CSV has dates like "11/23/2025" or "Nov 23, 2025"
-- Transform config specifies the input format
-- Output JSON stores dates in standardized ISO-8601 format with timezone (e.g., "2025-11-23T00:00:00-05:00")
-
-### 2. Date Display Format in Card Configuration
-
-Add a way to specify a display format for dates in our card configuration to convert ISO-8601 Dates in our database to user-friendly formats for display in card UI.
-
-**Example use case:**
-
-- Database stores: "2025-11-23T00:00:00-05:00"
-- Card config specifies format: "MMM DD, YYYY" or "MM/DD/YYYY"
-- UI displays: "Nov 23, 2025" or "11/23/2025"
 
 ### 3. Currency Parsing in CSV-to-JSON Transform
 

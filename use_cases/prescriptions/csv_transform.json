@@ -3,6 +3,23 @@
     "name": "_EHR/prescriptions",
     "group_by": "EPI"
   },
+  "column_types": {
+    "start_date": {
+      "type": "date",
+      "input_format": "%Y-%m-%d",
+      "timezone": "America/New_York"
+    },
+    "end_date": {
+      "type": "date",
+      "input_format": "%Y-%m-%d",
+      "timezone": "America/New_York"
+    },
+    "refill_date": {
+      "type": "date",
+      "input_format": "%Y-%m-%d",
+      "timezone": "America/New_York"
+    }
+  },
   "template": {
     "group_by": "medication_id",
     "template": {

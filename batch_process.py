@@ -18,8 +18,10 @@ import csv
 import json
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 import argparse
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 
 def load(csv_path: str, config_path: str) -> tuple[List[Dict[str, Any]], Dict[str, Any]]:
@@ -53,22 +55,95 @@ def load(csv_path: str, config_path: str) -> tuple[List[Dict[str, Any]], Dict[st
     return csv_rows, config
 
 
-def cleanse(csv_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def convert_date_to_iso8601(date_str: str, input_format: Optional[str] = None, timezone: str = "America/New_York") -> str:
     """
-    Cleanse and validate CSV data.
+    Convert a date string to ISO-8601 format with timezone offset.
+
+    Args:
+        date_str: The date string to convert
+        input_format: Optional strftime format string (e.g., "%m/%d/%Y"). If None, auto-detect.
+        timezone: Timezone name (default: "America/New_York")
+
+    Returns:
+        ISO-8601 formatted date string with timezone (e.g., "2025-11-23T00:00:00-05:00")
+    """
+    if not date_str or not date_str.strip():
+        return date_str
+
+    date_str = date_str.strip()
+
+    try:
+        # Parse the date
+        if input_format:
+            dt = datetime.strptime(date_str, input_format)
+        else:
+            # Auto-detect format - try common formats
+            formats = [
+                "%Y-%m-%d",           # 2025-11-23
+                "%m/%d/%Y",           # 11/23/2025
+                "%m/%d/%y",           # 11/23/25
+                "%b %d, %Y",          # Nov 23, 2025
+                "%B %d, %Y",          # November 23, 2025
+                "%Y-%m-%dT%H:%M:%S",  # 2025-11-23T00:00:00
+                "%Y-%m-%d %H:%M:%S",  # 2025-11-23 00:00:00
+            ]
+
+            dt = None
+            for fmt in formats:
+                try:
+                    dt = datetime.strptime(date_str, fmt)
+                    break
+                except ValueError:
+                    continue
+
+            if dt is None:
+                # If all formats fail, return original string
+                print(f"Warning: Could not parse date '{date_str}', keeping original value")
+                return date_str
+
+        # Add timezone info
+        tz = ZoneInfo(timezone)
+        dt_with_tz = dt.replace(tzinfo=tz)
+
+        # Return ISO-8601 format
+        return dt_with_tz.isoformat()
+
+    except Exception as e:
+        print(f"Warning: Error converting date '{date_str}': {e}, keeping original value")
+        return date_str
+
+
+def cleanse(csv_rows: List[Dict[str, Any]], column_types: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    """
+    Cleanse and validate CSV data, applying type conversions as specified.
 
     Args:
         csv_rows: List of dictionaries representing CSV rows
+        column_types: Optional dict mapping column names to type specifications
 
     Returns:
-        List of cleansed dictionaries
+        List of cleansed dictionaries with type conversions applied
     """
+    column_types = column_types or {}
     cleansed_rows = []
+
     for i, row in enumerate(csv_rows):
         cleaned_row = {k: v.strip() if isinstance(v, str) else v for k, v in row.items()}
         if all(not v for v in cleaned_row.values()):
             print(f"Skipping empty row at index {i}")
             continue
+
+        # Apply type conversions
+        for column_name, type_spec in column_types.items():
+            if column_name in cleaned_row:
+                value = cleaned_row[column_name]
+
+                if isinstance(type_spec, dict) and type_spec.get("type") == "date":
+                    # Convert date columns
+                    input_format = type_spec.get("input_format")
+                    timezone = type_spec.get("timezone", "America/New_York")
+                    cleaned_row[column_name] = convert_date_to_iso8601(value, input_format, timezone)
+
         cleansed_rows.append(cleaned_row)
 
     print(f"Cleansed {len(cleansed_rows)} rows")
@@ -320,7 +395,8 @@ def main():
 
     try:
         csv_rows, config = load(args.csv_file, args.transform_file)
-        cleansed_rows = cleanse(csv_rows)
+        column_types = config.get("column_types", {})
+        cleansed_rows = cleanse(csv_rows, column_types)
         combine(cleansed_rows, config, args.output)
         print("\nProcessing complete!")
     except Exception as e:
