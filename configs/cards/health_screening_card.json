@@ -1,0 +1,15 @@
+{
+  "attribute": "_EHR/health_screenings",
+  "foreach": "$[*]",
+  "template": {
+    "title": "{$.screening_type}",
+    "subtitle": "Due date: {format_date($.due_date, '%b %d, %Y')}",
+    "status": "{$.status}",
+    "?overdue_message": "You are {days_after($.due_date)} days overdue",
+    "?upcoming_message": "Due in {abs(days_after($.due_date))} days",
+    "?due_today": "Due today!",
+    "last_completed": "Last completed: {format_date($.last_completed_date, '%b %d, %Y')}",
+    "provider": "Provider: {$.recommended_by}",
+    "?notes": "{$.notes}"
+  }
+}
