@@ -2,22 +2,38 @@
 
 ## Overview
 
-The Swizzler template system enables flexible, configuration-driven data transformation and display without requiring code changes. This system supports adding new CSV formats and use cases by simply creating new configuration files.
+The Swizzler template system enables flexible, configuration-driven presentation and display without requiring code changes. This system supports adding new use cases and CSV formats by creating card and section configuration files with rich conditional logic and formatting.
+
+**Scope**: Templates are used in **card and section configuration files only**. CSV transforms continue to use their existing structural format (`group_by`, `collect`, `sort_by`) for data transformation.
 
 The template format is inspired by [Terrence Parr's StringTemplate](https://github.com/antlr/stringtemplate4/blob/master/doc/motivation.md) and implements the four canonical operations necessary for proper template-based rendering:
 
-1. **Attribute Reference** - Access data fields from JSON or CSV
+1. **Attribute Reference** - Access data fields from JSON
 2. **Template Reference** - Reuse template definitions (like `#include` or macro expansion)
 3. **Conditional Include** - Show/hide content based on conditions (IF statements)
 4. **Template Application to Lists** - Apply a template to each item in an array
+
+## Architecture: Data Transformation vs. Presentation
+
+**CSV Transforms** (`csv_transform.json` in use case directories):
+- **Purpose**: Transform flat CSV rows into nested JSON data structures
+- **Operations**: `group_by`, `collect`, `sort_by`, column mapping
+- **Output**: JSON data files stored as attributes
+- **No templates**: Uses existing structural format
+
+**Card/Section Configs** (`configs/cards/` and `configs/sections/`):
+- **Purpose**: Render JSON data into UI cards for display
+- **Operations**: Field selection, formatting, conditionals, list rendering
+- **Output**: Rendered cards sent to mobile client
+- **Uses templates**: Full template system with conditionals and references
 
 ## Core Concepts
 
 ### 1. Attribute Reference
 
-Access data from the current context using JSONPath expressions or column names.
+Access data from the current context using JSONPath expressions.
 
-**In Card Configurations** (rendering JSON data):
+**Example:**
 ```json
 {
   "templates": {
@@ -25,26 +41,18 @@ Access data from the current context using JSONPath expressions or column names.
       "title": "{$.medication_name}",
       "dosage": "{$.dosage} - {$.frequency}",
       "prescriber": "{$.prescriber.name}, {$.prescriber.specialty}",
-      "refill_count": "{len($.refills)}"
+      "refill_count": "{len($.refills)}",
+      "days_until": "{days_from_now($.appointment_date)}"
     }
   }
 }
 ```
 
-**In CSV Transforms** (transforming CSV columns):
-```json
-{
-  "templates": {
-    "root": {
-      "template": {
-        "medication_id": "{medication_id}",
-        "medication_name": "{medication_name}",
-        "dosage": "{dosage}"
-      }
-    }
-  }
-}
-```
+**JSONPath Syntax:**
+- `{$.field}` - Access top-level field
+- `{$.nested.field}` - Access nested field
+- `{$.array[0]}` - Access array element by index
+- `{$.array[-1]}` - Access last array element
 
 **Supported Functions:**
 - `len(array)` - Count items in an array
@@ -387,44 +395,6 @@ List templates can use conditionals and nested references:
 }
 ```
 
-### Example 4: CSV Transform with Templates
-
-```json
-{
-  "attribute": {
-    "name": "_EHR/prescriptions",
-    "group_by": "EPI"
-  },
-  "templates": {
-    "root": {
-      "group_by": "medication_id",
-      "template": {
-        "medication_id": "{medication_id}",
-        "medication_name": "{medication_name}",
-        "prescriber_name": "@full_name",
-        "status_display": "@active_status",
-        "refills": {
-          "collect": [
-            {
-              "refill_date": "{refill_date}",
-              "refill_number": "{refill_number}",
-              "pharmacy": "@pharmacy_info"
-            }
-          ]
-        }
-      }
-    },
-    "full_name": "{prescriber_first_name} {prescriber_last_name}",
-    "pharmacy_info": "{pharmacy_name} - {pharmacy_phone}",
-    "active_status": {
-      "condition": "status == 'active'",
-      "if_true": "Currently prescribed",
-      "if_false": "Discontinued on {end_date}"
-    }
-  }
-}
-```
-
 ## Syntax Reference
 
 ### Template Structure
@@ -501,16 +471,12 @@ List templates can use conditionals and nested references:
    - Referenced in template body without `$`: `{param1}`, `{param2}`
    - Passed when calling: `@template($.field, 'literal')`
 
-4. **JSONPath (in card configs):**
+4. **JSONPath:**
    - Use `$.` prefix to access current data context
    - Supports nested access: `$.field.subfield`
    - Supports array access: `$.array[0]`, `$.array[-1]`
 
-5. **Column Names (in CSV transforms):**
-   - Reference columns directly: `{column_name}`
-   - No `$.` prefix needed
-
-6. **Optional Fields:**
+5. **Optional Fields:**
    - Prefix field name with `?` in root/parent template
    - Field is omitted if value is falsy (empty, null, false, 0)
 
