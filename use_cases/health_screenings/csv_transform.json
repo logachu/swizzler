@@ -1,0 +1,23 @@
+{
+  "attribute": {
+    "name": "_EHR/health_screenings",
+    "group_by": "EPI"
+  },
+  "template": {
+    "group_by": "screening_id",
+    "sort_by": {
+      "field": "due_date",
+      "order": "asc"
+    },
+    "template": {
+      "screening_id": "{screening_id}",
+      "screening_type": "{screening_type}",
+      "due_date": "{due_date}",
+      "last_completed_date": "{last_completed_date}",
+      "status": "{status}",
+      "recommended_by": "{recommended_by}",
+      "frequency": "{frequency}",
+      "notes": "{notes}"
+    }
+  }
+}
