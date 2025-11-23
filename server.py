@@ -219,6 +219,39 @@ class ExpressionParser:
         self.jsonpath = jsonpath_engine
         self.compute = compute_funcs
 
+    @staticmethod
+    def split_function_args(arg_str: str) -> List[str]:
+        """
+        Split function arguments by comma, respecting quoted strings.
+
+        Example: "$.field, 'value, with comma'" -> ["$.field", "'value, with comma'"]
+        """
+        args = []
+        current_arg = []
+        in_quote = False
+        quote_char = None
+
+        for char in arg_str:
+            if char in ('"', "'") and not in_quote:
+                in_quote = True
+                quote_char = char
+                current_arg.append(char)
+            elif char == quote_char and in_quote:
+                in_quote = False
+                quote_char = None
+                current_arg.append(char)
+            elif char == ',' and not in_quote:
+                args.append(''.join(current_arg).strip())
+                current_arg = []
+            else:
+                current_arg.append(char)
+
+        # Add the last argument
+        if current_arg:
+            args.append(''.join(current_arg).strip())
+
+        return args
+
     def evaluate_expression(self, expr: str, data: Any, variables: Optional[Dict[str, str]] = None) -> Any:
         """
         Evaluate a single expression (content within {}).
@@ -254,12 +287,14 @@ class ExpressionParser:
                 return self.compute.sum(arg_value)
             elif func_name == "format_date":
                 # format_date takes two arguments
-                args = [a.strip().strip('"\'') for a in arg_expr.split(',')]
+                args = self.split_function_args(arg_expr)
                 if len(args) == 2:
                     # First arg is JSONPath, second is format string
                     date_results = self.jsonpath.evaluate(args[0], data, variables)
                     date_val = date_results[0] if date_results else ""
-                    return self.compute.format_date(str(date_val), args[1])
+                    # Strip quotes from format string
+                    format_str = args[1].strip('"\'')
+                    return self.compute.format_date(str(date_val), format_str)
                 return arg_value
             elif func_name == "days_from_now":
                 return self.compute.days_from_now(str(arg_value))
@@ -348,7 +383,16 @@ class CardRenderer:
         foreach_expr = card_config.get("foreach", "$")
         filter_by = card_config.get("filter_by")
         extract = card_config.get("extract")
-        template = card_config.get("template", {})
+
+        # Support both old "template" and new "templates.root" format
+        if "templates" in card_config:
+            templates = card_config["templates"]
+            if "root" not in templates:
+                raise ValueError(f"Card config '{card_config_name}' has 'templates' but missing 'root' template")
+            template = templates["root"]
+        else:
+            # Backward compatibility with old "template" format
+            template = card_config.get("template", {})
 
         # Load patient attribute data
         attribute_data = self.attr_loader.load_attribute(epi, attribute_name)
@@ -406,11 +450,12 @@ class CardRenderer:
         card = {}
 
         for field_name, field_value in template.items():
-            # Check if field is conditional (prefixed with ?)
+            # Check if field name is conditional (prefixed with ?)
             is_conditional = False
-            if isinstance(field_value, str) and field_value.startswith("?"):
+            actual_field_name = field_name
+            if field_name.startswith("?"):
                 is_conditional = True
-                field_value = field_value[1:]  # Remove ? prefix
+                actual_field_name = field_name[1:]  # Remove ? prefix from field name
 
             # Evaluate the field value
             if isinstance(field_value, str):
@@ -423,7 +468,7 @@ class CardRenderer:
                 if not rendered_value or rendered_value == "" or rendered_value == "0":
                     continue  # Skip this field
 
-            card[field_name] = rendered_value
+            card[actual_field_name] = rendered_value
 
         return card
 

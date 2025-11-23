@@ -1,0 +1,44 @@
+[
+  {
+    "medication_name": "Lisinopril",
+    "dosage": "10mg",
+    "frequency": "Once daily",
+    "status": "active",
+    "prescriber": {
+      "name": "Dr. Sarah Johnson",
+      "specialty": "Cardiology"
+    },
+    "refills": [
+      {
+        "refill_date": "2024-10-15T00:00:00-05:00",
+        "pharmacy": {
+          "name": "Main Street Pharmacy"
+        }
+      },
+      {
+        "refill_date": "2025-01-15T00:00:00-05:00",
+        "pharmacy": {
+          "name": "Main Street Pharmacy"
+        }
+      }
+    ]
+  },
+  {
+    "medication_name": "Metformin",
+    "dosage": "500mg",
+    "frequency": "Twice daily",
+    "status": "active",
+    "prescriber": {
+      "name": "Dr. Michael Chen",
+      "specialty": "Endocrinology"
+    },
+    "refills": [
+      {
+        "refill_date": "2025-02-01T00:00:00-05:00",
+        "pharmacy": {
+          "name": "Wellness Pharmacy"
+        }
+      }
+    ]
+  }
+]
