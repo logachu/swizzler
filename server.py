@@ -201,6 +201,22 @@ class ComputeFunctions:
         except Exception:
             return date_str
 
+    @staticmethod
+    def days_after(date_str: str) -> int:
+        """
+        Return number of days after a given date.
+        Positive if date is in the past (e.g., 5 days overdue).
+        Negative if date is in the future (e.g., -5 means due in 5 days).
+        Zero if date is today.
+        """
+        try:
+            dt = date_parser.parse(date_str)
+            today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            delta = (today - dt.replace(hour=0, minute=0, second=0, microsecond=0)).days
+            return delta
+        except Exception:
+            return 0
+
 
 # ============================================================================
 # Expression Parser
@@ -263,6 +279,8 @@ class ExpressionParser:
                 return arg_value
             elif func_name == "days_from_now":
                 return self.compute.days_from_now(str(arg_value))
+            elif func_name == "days_after":
+                return self.compute.days_after(str(arg_value))
 
         # Otherwise, it's a JSONPath expression
         if expr.startswith('$'):
