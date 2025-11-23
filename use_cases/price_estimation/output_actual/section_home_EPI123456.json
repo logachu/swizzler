@@ -8,7 +8,7 @@
             "datetime": "Nov 15 at 9:00",
             "location": "Main Hospital - Room 301",
             "procedure_count": "3 procedure(s)",
-            "days_until": "6 days from now"
+            "days_until": "8 days ago"
         },
         {
             "title": "Dr. Michael Chen",
@@ -16,7 +16,7 @@
             "datetime": "Nov 20 at 14:30",
             "location": "Clinic B - Suite 205",
             "procedure_count": "2 procedure(s)",
-            "days_until": "11 days from now"
+            "days_until": "3 days ago"
         },
         {
             "title": "Dr. Emily Rodriguez",
@@ -24,7 +24,7 @@
             "datetime": "Nov 22 at 10:15",
             "location": "Wellness Center",
             "procedure_count": "1 procedure(s)",
-            "days_until": "13 days from now"
+            "days_until": "yesterday"
         }
     ]
 }

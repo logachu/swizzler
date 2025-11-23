@@ -7,8 +7,8 @@
             "subtitle": "50mg - once daily",
             "prescriber": "Prescribed by Dr. Patricia Green, Psychiatry",
             "refill_count": "2 refill(s) on record",
-            "?last_refill": "2024-08-13",
-            "?pharmacy": "Walgreens",
+            "last_refill": "Aug 13, 2024",
+            "pharmacy": "Walgreens",
             "status": "active"
         },
         {
@@ -16,8 +16,8 @@
             "subtitle": "50mg - once daily",
             "prescriber": "Prescribed by Dr. Sarah Johnson, Cardiology",
             "refill_count": "2 refill(s) on record",
-            "?last_refill": "2024-09-29",
-            "?pharmacy": "CVS Pharmacy",
+            "last_refill": "Sep 29, 2024",
+            "pharmacy": "CVS Pharmacy",
             "status": "active"
         },
         {
@@ -25,8 +25,8 @@
             "subtitle": "2000IU - once daily",
             "prescriber": "Prescribed by Dr. Lisa Martinez, Primary Care",
             "refill_count": "2 refill(s) on record",
-            "?last_refill": "2024-08-30",
-            "?pharmacy": "Rite Aid",
+            "last_refill": "Aug 30, 2024",
+            "pharmacy": "Rite Aid",
             "status": "active"
         }
     ]
