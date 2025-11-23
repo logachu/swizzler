@@ -255,6 +255,45 @@ class TestOperation4ConditionalInclude:
 
 
 # ============================================================================
+# Operation 5: Template Application to Lists Tests
+# ============================================================================
+
+class TestOperation5TemplateApplicationToLists:
+    """Test template application to lists with pipe operator."""
+
+    def test_basic_list_application(self, card_renderer):
+        """Test basic {$.array|@template} syntax."""
+        cards = card_renderer.render_cards(
+            "operation5_basic_list_card.json",
+            "TEST002"
+        )
+
+        assert len(cards) == 1
+        card = cards[0]
+
+        # Should apply template to each procedure
+        assert "Blood Pressure Check" in card["procedures_list"]
+        assert "completed" in card["procedures_list"]
+        assert "EKG" in card["procedures_list"]
+        assert "scheduled" in card["procedures_list"]
+        assert "Blood Work" in card["procedures_list"]
+
+    def test_list_application_with_separator(self, card_renderer):
+        """Test {$.array|@template|separator=', '} syntax."""
+        cards = card_renderer.render_cards(
+            "operation5_separator_card.json",
+            "TEST002"
+        )
+
+        assert len(cards) == 1
+        card = cards[0]
+
+        # Should join with comma separator
+        expected = "Blood Pressure Check, EKG, Blood Work"
+        assert card["procedures_comma"] == expected
+
+
+# ============================================================================
 # Unit Tests for Core Components
 # ============================================================================
 

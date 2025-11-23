@@ -252,7 +252,95 @@ class ExpressionParser:
 
         return args
 
-    def evaluate_expression(self, expr: str, data: Any, variables: Optional[Dict[str, str]] = None) -> Any:
+    def evaluate_pipe_expression(
+        self,
+        expr: str,
+        data: Any,
+        variables: Optional[Dict[str, str]] = None,
+        templates: Optional[Dict[str, Any]] = None,
+        card_renderer: Optional['CardRenderer'] = None
+    ) -> str:
+        """
+        Evaluate a pipe expression: {$.array|@template|separator=', '}
+
+        Args:
+            expr: Pipe expression (e.g., "$.procedures|@procedure_item|separator=', '")
+            data: Data context
+            variables: Optional path variables
+            templates: Templates dict
+            card_renderer: CardRenderer for template application
+
+        Returns:
+            Joined string result
+        """
+        if not templates or not card_renderer:
+            return str(expr)
+
+        # Split by pipe, respecting quotes
+        parts = [p.strip() for p in expr.split('|')]
+
+        if len(parts) < 2:
+            return str(expr)
+
+        # First part is the array path
+        array_path = parts[0]
+
+        # Second part is the template reference
+        template_ref = parts[1]
+        if not template_ref.startswith('@'):
+            return str(expr)  # Invalid format
+
+        template_name = template_ref[1:]  # Remove @
+
+        # Third part (optional) is separator
+        separator = '\n'  # Default separator
+        if len(parts) >= 3:
+            separator_part = parts[2]
+            # Parse separator='...'
+            if '=' in separator_part:
+                _, sep_value = separator_part.split('=', 1)
+                separator = sep_value.strip().strip('"\'')
+                # Handle escape sequences
+                separator = separator.replace('\\n', '\n').replace('\\t', '\t')
+
+        # Evaluate the array path to get the list
+        array_results = self.jsonpath.evaluate(array_path, data, variables)
+        array_data = array_results[0] if array_results else []
+
+        if not isinstance(array_data, list):
+            return str(array_data)
+
+        # Apply template to each item
+        rendered_items = []
+        for item in array_data:
+            # Get the template
+            if template_name not in templates:
+                rendered_items.append(str(item))
+                continue
+
+            template_def = templates[template_name]
+
+            # Render the template for this item
+            if isinstance(template_def, str):
+                # String template - evaluate it
+                rendered = card_renderer.evaluate_field_value(template_def, item, variables, templates)
+                rendered_items.append(rendered)
+            else:
+                # Dict template (conditional) - evaluate it
+                rendered = card_renderer.evaluate_conditional_template(template_def, item, variables, templates)
+                rendered_items.append(rendered)
+
+        # Join with separator
+        return separator.join(rendered_items)
+
+    def evaluate_expression(
+        self,
+        expr: str,
+        data: Any,
+        variables: Optional[Dict[str, str]] = None,
+        templates: Optional[Dict[str, Any]] = None,
+        card_renderer: Optional['CardRenderer'] = None
+    ) -> Any:
         """
         Evaluate a single expression (content within {}).
 
@@ -260,11 +348,17 @@ class ExpressionParser:
             expr: Expression string (e.g., "$.field" or "len($.array)")
             data: Data context
             variables: Optional path variables
+            templates: Optional templates dict for pipe operator
+            card_renderer: Optional CardRenderer for template application
 
         Returns:
             Evaluated value
         """
         expr = expr.strip()
+
+        # Check if it's a pipe operator expression ($.array|@template)
+        if '|' in expr and card_renderer:
+            return self.evaluate_pipe_expression(expr, data, variables, templates, card_renderer)
 
         # Check if it's a function call
         func_match = self.FUNC_PATTERN.match(expr)
@@ -321,7 +415,14 @@ class ExpressionParser:
         # Literal value
         return expr
 
-    def evaluate_template_string(self, template: str, data: Any, variables: Optional[Dict[str, str]] = None) -> str:
+    def evaluate_template_string(
+        self,
+        template: str,
+        data: Any,
+        variables: Optional[Dict[str, str]] = None,
+        templates: Optional[Dict[str, Any]] = None,
+        card_renderer: Optional['CardRenderer'] = None
+    ) -> str:
         """
         Evaluate a template string with embedded {expressions}.
 
@@ -329,13 +430,15 @@ class ExpressionParser:
             template: Template string (e.g., "Date: {$.date} at {$.time}")
             data: Data context
             variables: Optional path variables
+            templates: Optional templates dict for pipe operator
+            card_renderer: Optional CardRenderer for template application
 
         Returns:
             String with all expressions evaluated and substituted
         """
         def replace_expr(match: Match[str]) -> str:
             expr = match.group(1)
-            value = self.evaluate_expression(expr, data, variables)
+            value = self.evaluate_expression(expr, data, variables, templates, card_renderer)
             return str(value) if value is not None else ""
 
         return self.EXPR_PATTERN.sub(replace_expr, template)
@@ -631,7 +734,7 @@ class CardRenderer:
 
         # Otherwise, expand any @template_name references in the string, then evaluate
         expanded_value = self.expand_template_references(field_value, data, variables, templates)
-        return self.expr_parser.evaluate_template_string(expanded_value, data, variables)
+        return self.expr_parser.evaluate_template_string(expanded_value, data, variables, templates, self)
 
     def expand_template_references(
         self,
@@ -656,8 +759,9 @@ class CardRenderer:
             templates = {}
 
         # Pattern to match @template_name (word characters only)
+        # But NOT when preceded by | (pipe operator for list application)
         import re
-        template_ref_pattern = re.compile(r'@(\w+)')
+        template_ref_pattern = re.compile(r'(?<!\|)@(\w+)')
 
         def replace_template_ref(match: Match[str]) -> str:
             template_name = match.group(1)
