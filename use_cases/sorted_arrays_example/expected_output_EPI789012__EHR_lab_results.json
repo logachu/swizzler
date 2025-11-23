@@ -1,0 +1,140 @@
+[
+  {
+    "lab_order_id": "LAB001",
+    "order_date": "2025-10-20",
+    "provider": "Dr. Sarah Johnson",
+    "tests": [
+      {
+        "test_code": "TEST003",
+        "test_name": "Triglycerides",
+        "result": {
+          "value": "95",
+          "unit": "mg/dL",
+          "reference_range": "<150"
+        },
+        "status": "completed",
+        "abnormal_flag": "Normal",
+        "priority": "stat",
+        "cost": "$95.50"
+      },
+      {
+        "test_code": "TEST002",
+        "test_name": "Glucose",
+        "result": {
+          "value": "118",
+          "unit": "mg/dL",
+          "reference_range": "70-100"
+        },
+        "status": "completed",
+        "abnormal_flag": "High",
+        "priority": "stat",
+        "cost": "$125.00"
+      },
+      {
+        "test_code": "TEST001",
+        "test_name": "Cholesterol",
+        "result": {
+          "value": "220",
+          "unit": "mg/dL",
+          "reference_range": "<200"
+        },
+        "status": "completed",
+        "abnormal_flag": "High",
+        "priority": "stat",
+        "cost": "$89.99"
+      }
+    ]
+  },
+  {
+    "lab_order_id": "LAB002",
+    "order_date": "2025-09-10",
+    "provider": "Dr. Michael Chen",
+    "tests": [
+      {
+        "test_code": "TEST004",
+        "test_name": "Creatinine",
+        "result": {
+          "value": "0.9",
+          "unit": "mg/dL",
+          "reference_range": "0.6-1.2"
+        },
+        "status": "completed",
+        "abnormal_flag": "Normal",
+        "priority": "routine",
+        "cost": "$52.00"
+      },
+      {
+        "test_code": "TEST008",
+        "test_name": "Potassium",
+        "result": {
+          "value": "4.2",
+          "unit": "mEq/L",
+          "reference_range": "3.5-5.0"
+        },
+        "status": "completed",
+        "abnormal_flag": "Normal",
+        "priority": "routine",
+        "cost": "$44.25"
+      },
+      {
+        "test_code": "TEST006",
+        "test_name": "Sodium",
+        "result": {
+          "value": "140",
+          "unit": "mEq/L",
+          "reference_range": "136-145"
+        },
+        "status": "completed",
+        "abnormal_flag": "Normal",
+        "priority": "routine",
+        "cost": "$42.50"
+      }
+    ]
+  },
+  {
+    "lab_order_id": "LAB003",
+    "order_date": "2025-08-15",
+    "provider": "Dr. Emily Rodriguez",
+    "tests": [
+      {
+        "test_code": "TEST005",
+        "test_name": "White Blood Cell Count",
+        "result": {
+          "value": "7.8",
+          "unit": "K/uL",
+          "reference_range": "4.5-11.0"
+        },
+        "status": "completed",
+        "abnormal_flag": "Normal",
+        "priority": "routine",
+        "cost": "$35.50"
+      },
+      {
+        "test_code": "TEST007",
+        "test_name": "Hemoglobin",
+        "result": {
+          "value": "14.2",
+          "unit": "g/dL",
+          "reference_range": "12.0-16.0"
+        },
+        "status": "completed",
+        "abnormal_flag": "Normal",
+        "priority": "routine",
+        "cost": "$45.00"
+      },
+      {
+        "test_code": "TEST009",
+        "test_name": "Platelet Count",
+        "result": {
+          "value": "245",
+          "unit": "K/uL",
+          "reference_range": "150-400"
+        },
+        "status": "completed",
+        "abnormal_flag": "Normal",
+        "priority": "routine",
+        "cost": "$38.75"
+      }
+    ]
+  }
+]

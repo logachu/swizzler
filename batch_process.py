@@ -136,6 +136,100 @@ def apply_template(rows: List[Dict[str, Any]], template: Any) -> Any:
             return row.get(ref[1:-1], "")
         return ref
 
+    def get_nested_value(obj: Any, field_path: str) -> Any:
+        """
+        Extract a value from a nested object using dot notation.
+
+        Args:
+            obj: The object to extract from (dict or other)
+            field_path: Dot-separated path (e.g., "result.value")
+
+        Returns:
+            The value at the specified path, or empty string if not found
+        """
+        if not isinstance(obj, dict):
+            return ""
+
+        parts = field_path.split(".")
+        current = obj
+
+        for part in parts:
+            if isinstance(current, dict):
+                current = current.get(part, "")
+            else:
+                return ""
+
+        return current
+
+    def parse_sort_value(value: str) -> Any:
+        """
+        Parse a string value into a sortable type.
+        Handles: numbers, currency, dates, and strings.
+
+        Args:
+            value: String value to parse
+
+        Returns:
+            Tuple of (type_priority, parsed_value) for consistent sorting
+        """
+        if not isinstance(value, str):
+            value = str(value) if value is not None else ""
+
+        value = value.strip()
+
+        if not value:
+            return (3, "")  # Empty strings sort last
+
+        # Try parsing as currency (e.g., "$89.99", "$125.00")
+        if value.startswith("$"):
+            try:
+                numeric_value = float(value[1:].replace(",", ""))
+                return (0, numeric_value)  # Currency sorts as numbers
+            except ValueError:
+                pass
+
+        # Try parsing as number (including decimals)
+        try:
+            numeric_value = float(value)
+            return (0, numeric_value)
+        except ValueError:
+            pass
+
+        # Return as string (for dates and text)
+        # ISO dates like "2025-10-20" will sort correctly as strings
+        return (1, value)
+
+    def apply_sort(items: List[Any], sort_config: Dict[str, str]) -> List[Any]:
+        """
+        Sort a list of items based on sort configuration.
+
+        Args:
+            items: List to sort
+            sort_config: Dict with 'field' and 'order' keys
+
+        Returns:
+            Sorted list
+        """
+        if not sort_config or not items:
+            return items
+
+        field = sort_config.get("field")
+        order = sort_config.get("order", "asc")
+
+        if not field:
+            return items
+
+        # Normalize order to boolean (True = ascending, False = descending)
+        # Accept: "asc", "ascending", "desc", "descending"
+        ascending = order.lower() in ("asc", "ascending")
+
+        # Create sort key function
+        def sort_key(item):
+            value = get_nested_value(item, field)
+            return parse_sort_value(value)
+
+        return sorted(items, key=sort_key, reverse=not ascending)
+
     def build(tmpl, data_rows):
         """Recursively build nested structure from template and rows."""
         if not data_rows:
@@ -147,7 +241,13 @@ def apply_template(rows: List[Dict[str, Any]], template: Any) -> Any:
                 # Collect all rows as array items
                 collect_template = tmpl["collect"]
                 if isinstance(collect_template, list) and collect_template:
-                    return [build(collect_template[0], [row]) for row in data_rows]
+                    result = [build(collect_template[0], [row]) for row in data_rows]
+
+                    # Apply sorting if sort_by is specified
+                    if "sort_by" in tmpl:
+                        result = apply_sort(result, tmpl["sort_by"])
+
+                    return result
                 return []
 
             if "group_by" in tmpl:
@@ -161,7 +261,13 @@ def apply_template(rows: List[Dict[str, Any]], template: Any) -> Any:
                     if key:
                         grouped[key].append(row)
 
-                return [build(nested_template, group_rows) for group_rows in grouped.values()]
+                result = [build(nested_template, group_rows) for group_rows in grouped.values()]
+
+                # Apply sorting if sort_by is specified
+                if "sort_by" in tmpl:
+                    result = apply_sort(result, tmpl["sort_by"])
+
+                return result
 
             # Regular object mapping
             # Check for potential data loss: if multiple rows exist and we're mapping fields directly,
@@ -169,7 +275,7 @@ def apply_template(rows: List[Dict[str, Any]], template: Any) -> Any:
             if len(data_rows) > 1:
                 # Check if any non-nested fields have different values across rows
                 for key, value in tmpl.items():
-                    if key in ("group_by", "template"):
+                    if key in ("group_by", "template", "sort_by"):
                         continue
                     # Only check non-nested fields (strings with column references)
                     if isinstance(value, str) and value.startswith("{") and value.endswith("}"):
@@ -186,7 +292,7 @@ def apply_template(rows: List[Dict[str, Any]], template: Any) -> Any:
             result = {}
             row = data_rows[0]  # Use first row for field values
             for key, value in tmpl.items():
-                if key in ("group_by", "template"):
+                if key in ("group_by", "template", "sort_by"):
                     continue
                 result[key] = build(value, data_rows) if isinstance(value, dict) else pull(row, value)
             return result
