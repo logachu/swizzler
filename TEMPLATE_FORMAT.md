@@ -2,40 +2,28 @@
 
 ## Overview
 
-The Swizzler template system enables flexible, configuration-driven presentation and display without requiring code changes. This system supports adding new use cases and CSV formats by creating card and section configuration files with rich conditional logic and formatting.
+The template system enables flexible, configuration-driven presentation and display without requiring code changes. This system supports adding new use cases and CSV formats by creating card and section configuration files with rich conditional logic and formatting.
 
-**Scope**: Templates are used in **card and section configuration files only**. CSV transforms continue to use their existing structural format (`group_by`, `collect`, `sort_by`) for data transformation.
+The template format is inspired by [Terrence Parr's StringTemplate](https://github.com/antlr/stringtemplate4/blob/master/doc/motivation.md) and implements the four canonical operations necessary for expressive template-based rendering. Based on years of experience with a website templating system and eventually in the code-generation backend used by [ANTLR](https://pragprog.com/titles/tpantlr2/the-definitive-antlr-4-reference/) capable of creating compilers for modern programming languages and interpreters, Parr determined there are only four operations necessary:
 
-The template format is inspired by [Terrence Parr's StringTemplate](https://github.com/antlr/stringtemplate4/blob/master/doc/motivation.md) and implements the four canonical operations necessary for proper template-based rendering:
-
-1. **Attribute Reference** - Access data fields from JSON
-2. **Template Reference** - Reuse template definitions (like `#include` or macro expansion)
-3. **Conditional Include** - Show/hide content based on conditions (IF statements)
+1. **Attribute Reference** - Access data fields from JSON using JSON Path syntax
+2. **Template Reference** - Templates can refer to other templates and pass arguments allowing reuse  of templates like function calls.
+3. **Conditional Include** - Show/hide content based on conditions (IF and SWITCH statements)
 4. **Template Application to Lists** - Apply a template to each item in an array
 
-## Architecture: Data Transformation vs. Presentation
 
-**CSV Transforms** (`csv_transform.json` in use case directories):
-- **Purpose**: Transform flat CSV rows into nested JSON data structures
-- **Operations**: `group_by`, `collect`, `sort_by`, column mapping
-- **Output**: JSON data files stored as attributes
-- **No templates**: Uses existing structural format
 
-**Card/Section Configs** (`configs/cards/` and `configs/sections/`):
-- **Purpose**: Render JSON data into UI cards for display
-- **Operations**: Field selection, formatting, conditionals, list rendering
-- **Output**: Rendered cards sent to mobile client
-- **Uses templates**: Full template system with conditionals and references
-
-## Core Concepts
+## Core Operations
 
 ### 1. Attribute Reference
 
 Access data from the current context using JSONPath expressions.
 
 **Example:**
+
 ```json
 {
+  ...Other Card or Card Collection Configuration
   "templates": {
     "root": {
       "title": "{$.medication_name}",
@@ -49,29 +37,38 @@ Access data from the current context using JSONPath expressions.
 ```
 
 **JSONPath Syntax:**
+
 - `{$.field}` - Access top-level field
 - `{$.nested.field}` - Access nested field
+- `{$.array} - Access the full array of elements
 - `{$.array[0]}` - Access array element by index
 - `{$.array[-1]}` - Access last array element
 
+NOTE: array slice syntax could be added as a future enhancement, but I couldnt' think of a use case for it.
+
 **Supported Functions:**
 - `len(array)` - Count items in an array
-- `sum(array)` - Sum numeric values
+- `sum(array.numericField)` - Sum numeric values
 - `format_date(date, format)` - Format dates (e.g., `'%b %d, %Y'`)
 - `days_from_now(date)` - Calculate days until/since a date
 
+NOTE: could add other date-related functions that resolve to hours, weeks, months, years, etc. or a generic time_from_now('days', "01-01-1970")
+
 ### 2. Template Reference
 
-Define reusable template fragments and reference them with `@template_name`.
+The "templates" object always contains a least one "root" template which may reference additional named templates `@template_name`. The templates should form
+a tree of references, however recursive references should be possible. There are use cases for recursion when generating code, but I haven't thought of use cases
+for Praia card and card collection templates. Reference cycles must be avoided. We can check for this in code, but we don't want to do this every time we evaluate a template
+so we should have some validation script when we check in card or card collection config files.
 
 **Basic Template Reference:**
+
 ```json
 {
   "templates": {
     "root": {
       "title": "{$.medication_name}",
-      "prescriber": "@prescriber_info",
-      "status": "@medication_status"
+      "description": "@prescriber_info\n@medication_status"
     },
     "prescriber_info": "Prescribed by {$.prescriber.name}, {$.prescriber.specialty}",
     "medication_status": "{$.status}"
@@ -81,24 +78,24 @@ Define reusable template fragments and reference them with `@template_name`.
 
 **Parameterized Templates:**
 
-Templates can accept parameters for greater reusability:
+Templates can accept parameters. Here 'label' and 'amount' are template parameters:
 
 ```json
 {
   "templates": {
     "root": {
-      "copay": "@currency($.costs.copay, 'Copay')",
-      "deductible": "@currency($.costs.deductible, 'Deductible')",
-      "total": "@currency($.costs.total, 'Total')"
+      "copay": "@currency('Copay', $.costs.copay)",
+      "deductible": "@currency('Deductible', $.costs.deductible)",
+      "total": "@currency('Total', $.costs.total)"
     },
-    "currency(amount, label)": "{label}: ${amount}"
+    "currency(label, amount)": "{label}: {format_currency(amount)}"
   }
 }
 ```
 
 **Nested Template References:**
 
-Templates can reference other templates:
+Templates can reference other templates. Here "root" refers to "full_medication_info" which refers to "status_badge"
 
 ```json
 {
@@ -126,7 +123,8 @@ Show different content based on conditions. Supports simple if/else and multi-co
 {
   "templates": {
     "root": {
-      "billing_message": "@payment_status"
+      "title": "Payment Status",
+      "description": "@payment_status" 
     },
     "payment_status": {
       "condition": "$.amount_due > 0",
@@ -154,7 +152,7 @@ Show different content based on conditions. Supports simple if/else and multi-co
 }
 ```
 
-**Multi-Condition (if/elif/else chains):**
+**Multi-Condition (switch/case or if/elif/else chains):**
 
 ```json
 {
@@ -210,14 +208,16 @@ Apply a template to each element in an array using the pipe operator `|`.
 {
   "templates": {
     "root": {
-      "procedures": "{$.procedures|@procedure_display}"
+      "title": "Procedures:",
+      "description": "{$.procedures|@procedure_display}"
     },
-    "procedure_display": "• {$.name} - {$.status}"
+    "procedure_display": "• {$.name} - {$.status}\n"
   }
 }
 ```
 
 This transforms:
+
 ```json
 {
   "procedures": [
@@ -228,7 +228,9 @@ This transforms:
 ```
 
 Into a rendered list:
+
 ```
+Procedures:
 • Blood Test - completed
 • X-Ray - scheduled
 ```
@@ -401,7 +403,7 @@ List templates can use conditionals and nested references:
 
 ```json
 {
-  "attribute": "...",
+  "attribute": "_EHR/cohorts",
   "foreach": "...",
   "templates": {
     "root": { ... },
@@ -479,31 +481,3 @@ List templates can use conditionals and nested references:
 5. **Optional Fields:**
    - Prefix field name with `?` in root/parent template
    - Field is omitted if value is falsy (empty, null, false, 0)
-
-## Migration Path
-
-**Existing configs continue to work:**
-
-Old format (still valid):
-```json
-{
-  "template": {
-    "title": "{$.name}",
-    "?optional_field": "{$.field}"
-  }
-}
-```
-
-New format (with templates):
-```json
-{
-  "templates": {
-    "root": {
-      "title": "{$.name}",
-      "?optional_field": "{$.field}"
-    }
-  }
-}
-```
-
-Both formats are supported to maintain backward compatibility.
