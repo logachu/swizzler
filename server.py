@@ -393,6 +393,7 @@ class CardRenderer:
         else:
             # Backward compatibility with old "template" format
             template = card_config.get("template", {})
+            templates = {}  # Empty templates dict for old format
 
         # Load patient attribute data
         attribute_data = self.attr_loader.load_attribute(epi, attribute_name)
@@ -424,7 +425,7 @@ class CardRenderer:
         # Render a card for each item
         cards = []
         for item in items:
-            card = self.render_single_card(template, item, variables)
+            card = self.render_single_card(template, item, variables, templates)
             if card:  # Only include if not empty (conditional fields might remove all)
                 cards.append(card)
 
@@ -434,7 +435,8 @@ class CardRenderer:
         self,
         template: Dict[str, Any],
         data: Any,
-        variables: Optional[Dict[str, str]] = None
+        variables: Optional[Dict[str, str]] = None,
+        templates: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Render a single card from template and data.
@@ -443,10 +445,14 @@ class CardRenderer:
             template: Card template dictionary
             data: Data item
             variables: Optional path variables
+            templates: Optional templates dict for template references
 
         Returns:
             Rendered card dictionary
         """
+        if templates is None:
+            templates = {}
+
         card = {}
 
         for field_name, field_value in template.items():
@@ -459,7 +465,7 @@ class CardRenderer:
 
             # Evaluate the field value
             if isinstance(field_value, str):
-                rendered_value = self.expr_parser.evaluate_template_string(field_value, data, variables)
+                rendered_value = self.evaluate_field_value(field_value, data, variables, templates)
             else:
                 rendered_value = field_value
 
@@ -471,6 +477,93 @@ class CardRenderer:
             card[actual_field_name] = rendered_value
 
         return card
+
+    def evaluate_field_value(
+        self,
+        field_value: str,
+        data: Any,
+        variables: Optional[Dict[str, str]] = None,
+        templates: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """
+        Evaluate a field value, handling template references.
+
+        Args:
+            field_value: The template string or template reference
+            data: Data context
+            variables: Optional path variables
+            templates: Templates dict for resolving references
+
+        Returns:
+            Evaluated value
+        """
+        if templates is None:
+            templates = {}
+
+        # Check if it's a pure template reference (@template_name with no other content)
+        if field_value.startswith("@") and " " not in field_value and "\n" not in field_value:
+            template_name = field_value[1:]  # Remove @ prefix
+
+            # Look up the template
+            if template_name not in templates:
+                raise ValueError(f"Template reference '@{template_name}' not found in templates")
+
+            referenced_template = templates[template_name]
+
+            # Recursively evaluate the referenced template
+            if isinstance(referenced_template, str):
+                # It's a string template, evaluate it
+                return self.evaluate_field_value(referenced_template, data, variables, templates)
+            else:
+                # It's a dict (conditional template), will handle in Operation 4
+                return str(referenced_template)
+
+        # Otherwise, expand any @template_name references in the string, then evaluate
+        expanded_value = self.expand_template_references(field_value, data, variables, templates)
+        return self.expr_parser.evaluate_template_string(expanded_value, data, variables)
+
+    def expand_template_references(
+        self,
+        text: str,
+        data: Any,
+        variables: Optional[Dict[str, str]] = None,
+        templates: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """
+        Expand all @template_name references in a string.
+
+        Args:
+            text: Text containing possible template references
+            data: Data context
+            variables: Optional path variables
+            templates: Templates dict
+
+        Returns:
+            Text with all @template_name references expanded
+        """
+        if templates is None:
+            templates = {}
+
+        # Pattern to match @template_name (word characters only)
+        import re
+        template_ref_pattern = re.compile(r'@(\w+)')
+
+        def replace_template_ref(match: Match[str]) -> str:
+            template_name = match.group(1)
+
+            if template_name not in templates:
+                raise ValueError(f"Template reference '@{template_name}' not found in templates")
+
+            referenced_template = templates[template_name]
+
+            # Recursively evaluate the referenced template
+            if isinstance(referenced_template, str):
+                return self.evaluate_field_value(referenced_template, data, variables, templates)
+            else:
+                # Dict template (conditional), will handle in Operation 4
+                return str(referenced_template)
+
+        return template_ref_pattern.sub(replace_template_ref, text)
 
 
 # ============================================================================

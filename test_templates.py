@@ -147,6 +147,56 @@ class TestOperation1AttributeReference:
 
 
 # ============================================================================
+# Operation 2: Template Reference Tests
+# ============================================================================
+
+class TestOperation2TemplateReference:
+    """Test template references with @template_name syntax."""
+
+    def test_basic_template_reference(self, card_renderer):
+        """Test basic @template_name reference."""
+        cards = card_renderer.render_cards(
+            "operation2_card.json",
+            "TEST001"
+        )
+
+        assert len(cards) == 2
+
+        card1 = cards[0]
+        # Check that @prescriber_info was expanded
+        assert card1["prescriber"] == "Prescribed by Dr. Sarah Johnson, Cardiology"
+        # Check that @medication_status was expanded
+        assert card1["status_display"] == "Status: active"
+
+    def test_template_reference_with_data(self, card_renderer):
+        """Test that template references can access data context."""
+        cards = card_renderer.render_cards(
+            "operation2_card.json",
+            "TEST001"
+        )
+
+        card2 = cards[1]  # Metformin
+        assert card2["prescriber"] == "Prescribed by Dr. Michael Chen, Endocrinology"
+        assert card2["status_display"] == "Status: active"
+
+    def test_nested_template_references(self, card_renderer):
+        """Test nested template references (templates calling other templates)."""
+        cards = card_renderer.render_cards(
+            "operation2_nested_card.json",
+            "TEST001"
+        )
+
+        assert len(cards) == 2
+
+        card1 = cards[0]  # Lisinopril
+        # @medication_details references @prescriber_specialty
+        assert card1["full_info"] == "10mg - Cardiology"
+
+        card2 = cards[1]  # Metformin
+        assert card2["full_info"] == "500mg - Endocrinology"
+
+
+# ============================================================================
 # Unit Tests for Core Components
 # ============================================================================
 
