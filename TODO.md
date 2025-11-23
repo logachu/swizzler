@@ -63,6 +63,59 @@ Create an interactive tool for creating the csv_transform.json files by showing 
 - Helps users understand the relationship between CSV structure, config, and JSON output
 - Makes the system more accessible to non-technical users
 
+### 6. Tutorial Examples for Developer Onboarding
+Create a comprehensive tutorial series that teaches the system to new developers through progressive, step-by-step examples.
+
+**Tutorial Structure:**
+- Start with simple examples and gradually introduce complexity
+- Each tutorial builds on concepts from previous ones
+- Cover both csv_transform.json format and JSON card configuration format
+- Include working code, sample data, and expected outputs
+
+**Proposed Tutorial Sequence:**
+
+1. **Hello World**: Basic CSV to flat JSON
+   - Simple one-to-one field mapping
+   - Introduction to `{column_name}` syntax
+
+2. **Nested Objects**: Creating hierarchical structures
+   - Grouping related fields into nested objects
+   - Understanding template structure
+
+3. **Simple Arrays**: Using `collect` for one-to-many relationships
+   - Collecting multiple rows into an array
+   - When and why to use `collect`
+
+4. **Grouping Data**: Using `group_by` for data organization
+   - Creating separate objects from grouped rows
+   - Understanding multi-level grouping
+
+5. **Sorting Arrays**: Introducing the `sort_by` feature
+   - Sorting by simple fields
+   - Sorting by nested fields with dot notation
+   - Different data types (numbers, dates, currency, strings)
+
+6. **Complex Nested Structures**: Combining concepts
+   - Multiple levels of nesting
+   - Mixed arrays and objects
+   - Real-world healthcare data example
+
+7. **Card Configuration Basics**: Displaying data in UI
+   - JSONPath expressions for data extraction
+   - Card templates and sections
+   - Linking PersonStore data to UI components
+
+8. **Advanced Card Features**: Dynamic UI rendering
+   - Conditional rendering
+   - Data formatting for display
+   - Building complete card-based interfaces
+
+**Benefits:**
+- Reduces onboarding time for new developers
+- Establishes best practices and patterns
+- Serves as living documentation
+- Provides reusable templates for common scenarios
+
 ---
 
 ## Notes
