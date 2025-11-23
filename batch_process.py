@@ -55,58 +55,125 @@ def load(csv_path: str, config_path: str) -> tuple[List[Dict[str, Any]], Dict[st
     return csv_rows, config
 
 
-def convert_date_to_iso8601(date_str: str, input_format: Optional[str] = None, timezone: str = "America/New_York") -> str:
+def user_format_to_strftime(user_format: str) -> str:
     """
-    Convert a date string to ISO-8601 format with timezone offset.
+    Convert user-friendly date format to Python strftime format.
+
+    Args:
+        user_format: User-friendly format like "MM/DD/YYYY" or "YYYY-MM-DD"
+
+    Returns:
+        Python strftime format string like "%m/%d/%Y" or "%Y-%m-%d"
+
+    Examples:
+        "MM/DD/YYYY" -> "%m/%d/%Y"
+        "YYYY-MM-DD" -> "%Y-%m-%d"
+        "DD/MM/YYYY" -> "%d/%m/%Y"
+        "MM/DD/YYYY ZZZ" -> "%m/%d/%Y %Z"
+    """
+    # Map user-friendly tokens to strftime codes
+    replacements = [
+        ("YYYY", "%Y"),  # 4-digit year
+        ("YY", "%y"),    # 2-digit year
+        ("MM", "%m"),    # 2-digit month
+        ("DD", "%d"),    # 2-digit day
+        ("ZZZ", "%Z"),   # Timezone abbreviation (EST, PST, etc.)
+    ]
+
+    result = user_format
+    for user_token, strftime_code in replacements:
+        result = result.replace(user_token, strftime_code)
+
+    return result
+
+
+def convert_date_to_iso8601(date_str: str, input_format: Optional[str] = None, timezone: Optional[str] = None) -> str:
+    """
+    Convert a date string to ISO-8601 format with optional timezone offset.
 
     Args:
         date_str: The date string to convert
-        input_format: Optional strftime format string (e.g., "%m/%d/%Y"). If None, auto-detect.
-        timezone: Timezone name (default: "America/New_York")
+        input_format: Optional format string. Can be:
+            - "ISO-8601" for ISO-8601 dates
+            - User-friendly format like "MM/DD/YYYY" or "YYYY-MM-DD"
+            - If None, auto-detect common formats
+        timezone: Optional timezone name (e.g., "America/New_York").
+                 If None and date string doesn't contain timezone, output date without timezone
 
     Returns:
-        ISO-8601 formatted date string with timezone (e.g., "2025-11-23T00:00:00-05:00")
+        ISO-8601 formatted date string, with timezone if available (e.g., "2025-11-23T00:00:00-05:00")
+        or without timezone if not available (e.g., "2025-11-23T00:00:00")
     """
     if not date_str or not date_str.strip():
         return date_str
 
     date_str = date_str.strip()
+    parsed_dt = None
+    has_timezone_info = False
 
     try:
-        # Parse the date
-        if input_format:
-            dt = datetime.strptime(date_str, input_format)
+        # Handle ISO-8601 format explicitly
+        if input_format == "ISO-8601":
+            from dateutil import parser as date_parser
+            parsed_dt = date_parser.parse(date_str)
+            has_timezone_info = parsed_dt.tzinfo is not None
+        elif input_format:
+            # Convert user-friendly format to strftime format
+            strftime_format = user_format_to_strftime(input_format)
+
+            # Try parsing with the converted format
+            try:
+                parsed_dt = datetime.strptime(date_str, strftime_format)
+                # Check if format includes timezone
+                has_timezone_info = "%Z" in strftime_format or "%z" in strftime_format
+            except ValueError:
+                # If parsing fails, might be because of timezone abbreviation handling
+                # Try using dateutil parser instead
+                from dateutil import parser as date_parser
+                parsed_dt = date_parser.parse(date_str)
+                has_timezone_info = parsed_dt.tzinfo is not None
         else:
             # Auto-detect format - try common formats
             formats = [
                 "%Y-%m-%d",           # 2025-11-23
                 "%m/%d/%Y",           # 11/23/2025
                 "%m/%d/%y",           # 11/23/25
+                "%d/%m/%Y",           # 23/11/2025 (European)
                 "%b %d, %Y",          # Nov 23, 2025
                 "%B %d, %Y",          # November 23, 2025
                 "%Y-%m-%dT%H:%M:%S",  # 2025-11-23T00:00:00
                 "%Y-%m-%d %H:%M:%S",  # 2025-11-23 00:00:00
             ]
 
-            dt = None
             for fmt in formats:
                 try:
-                    dt = datetime.strptime(date_str, fmt)
+                    parsed_dt = datetime.strptime(date_str, fmt)
                     break
                 except ValueError:
                     continue
 
-            if dt is None:
-                # If all formats fail, return original string
-                print(f"Warning: Could not parse date '{date_str}', keeping original value")
-                return date_str
+            if parsed_dt is None:
+                # Try dateutil parser as last resort
+                from dateutil import parser as date_parser
+                parsed_dt = date_parser.parse(date_str)
+                has_timezone_info = parsed_dt.tzinfo is not None
 
-        # Add timezone info
-        tz = ZoneInfo(timezone)
-        dt_with_tz = dt.replace(tzinfo=tz)
+        if parsed_dt is None:
+            print(f"Warning: Could not parse date '{date_str}', keeping original value")
+            return date_str
+
+        # Add timezone info if available and not already present
+        if timezone and not has_timezone_info:
+            tz = ZoneInfo(timezone)
+            parsed_dt = parsed_dt.replace(tzinfo=tz)
+        elif has_timezone_info and parsed_dt.tzinfo is None:
+            # Edge case: format indicated timezone but parsing didn't capture it
+            if timezone:
+                tz = ZoneInfo(timezone)
+                parsed_dt = parsed_dt.replace(tzinfo=tz)
 
         # Return ISO-8601 format
-        return dt_with_tz.isoformat()
+        return parsed_dt.isoformat()
 
     except Exception as e:
         print(f"Warning: Error converting date '{date_str}': {e}, keeping original value")
@@ -141,7 +208,7 @@ def cleanse(csv_rows: List[Dict[str, Any]], column_types: Optional[Dict[str, Any
                 if isinstance(type_spec, dict) and type_spec.get("type") == "date":
                     # Convert date columns
                     input_format = type_spec.get("input_format")
-                    timezone = type_spec.get("timezone", "America/New_York")
+                    timezone = type_spec.get("timezone")  # Optional, None if not specified
                     cleaned_row[column_name] = convert_date_to_iso8601(value, input_format, timezone)
 
         cleansed_rows.append(cleaned_row)

@@ -4,15 +4,17 @@
 
 ### ✅ 1. Date Format Conversion in CSV-to-JSON Transform (COMPLETED)
 
-Added support in our CSV-to-JSON transform format that allows us to describe CSV columns with arbitrary date formats that we will convert to ISO-8601 Dates with timezone offset in our simulated PersonStore DB.
+Added support in our CSV-to-JSON transform format that allows us to describe CSV columns with arbitrary date formats that we will convert to ISO-8601 Dates with optional timezone offset in our simulated PersonStore DB.
 
 **Implementation:**
 
 - Added `column_types` section to csv_transform.json format
-- Supports specifying date columns with `type: "date"`, optional `input_format`, and `timezone`
-- Auto-detects common date formats if input_format not specified
-- Converts dates to ISO-8601 with timezone offset (e.g., "2025-11-23T00:00:00-05:00")
-- Updated batch_process.py with `convert_date_to_iso8601()` function
+- Supports user-friendly date format notation (e.g., "YYYY-MM-DD", "MM/DD/YYYY", "MM/DD/YYYY ZZZ")
+- `input_format` is optional - auto-detects common formats if not specified
+- `timezone` is optional - if not provided and not in date string, outputs ISO-8601 without timezone
+- Supports timezone abbreviations in date strings (EST, PST, etc.)
+- Converts dates to ISO-8601 format with or without timezone (e.g., "2025-11-23T00:00:00-05:00" or "2025-11-23T00:00:00")
+- Updated batch_process.py with `convert_date_to_iso8601()` and `user_format_to_strftime()` functions
 
 **Example:**
 
@@ -21,7 +23,7 @@ Added support in our CSV-to-JSON transform format that allows us to describe CSV
   "column_types": {
     "appointment_date": {
       "type": "date",
-      "input_format": "%Y-%m-%d",
+      "input_format": "YYYY-MM-DD",
       "timezone": "America/New_York"
     }
   }

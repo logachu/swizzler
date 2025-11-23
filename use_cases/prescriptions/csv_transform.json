@@ -6,17 +6,17 @@
   "column_types": {
     "start_date": {
       "type": "date",
-      "input_format": "%Y-%m-%d",
+      "input_format": "YYYY-MM-DD",
       "timezone": "America/New_York"
     },
     "end_date": {
       "type": "date",
-      "input_format": "%Y-%m-%d",
+      "input_format": "YYYY-MM-DD",
       "timezone": "America/New_York"
     },
     "refill_date": {
       "type": "date",
-      "input_format": "%Y-%m-%d",
+      "input_format": "YYYY-MM-DD",
       "timezone": "America/New_York"
     }
   },
