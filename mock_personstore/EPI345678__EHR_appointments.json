@@ -1,7 +1,7 @@
 [
   {
     "appointment_id": "APT001",
-    "date": "2025-12-02",
+    "date": "2025-12-02T00:00:00-05:00",
     "time": "09:30",
     "provider": {
       "name": "Dr. Anna White",
@@ -33,7 +33,7 @@
   },
   {
     "appointment_id": "APT002",
-    "date": "2025-12-05",
+    "date": "2025-12-05T00:00:00-05:00",
     "time": "13:45",
     "provider": {
       "name": "Dr. James Green",

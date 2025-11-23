@@ -1,53 +1,125 @@
 # Project TODOs
 
-## Future Enhancements
+## Completed Enhancements
 
-### 1. Date Format Conversion in CSV-to-JSON Transform
+### ✅ 1. Date Format Conversion in CSV-to-JSON Transform (COMPLETED)
 
-Add support in our CSV-to-JSON transform format that allows us to describe CSV columns with arbitrary date formats that we will convert to ISO-8601 Dates with timezone offset in our simulated PersonStore DB.
+Added support in our CSV-to-JSON transform format that allows us to describe CSV columns with arbitrary date formats that we will convert to ISO-8601 Dates with optional timezone offset in our simulated PersonStore DB.
 
-**Example use case:**
+**Implementation:**
+
+- Added `column_types` section to csv_transform.json format
+- Supports user-friendly date format notation (e.g., "YYYY-MM-DD", "MM/DD/YYYY", "MM/DD/YYYY ZZZ")
+- `input_format` is optional - auto-detects common formats if not specified
+- `timezone` is optional - if not provided and not in date string, outputs ISO-8601 without timezone
+- Supports timezone abbreviations in date strings (EST, PST, etc.)
+- Converts dates to ISO-8601 format with or without timezone (e.g., "2025-11-23T00:00:00-05:00" or "2025-11-23T00:00:00")
+- Updated batch_process.py with `convert_date_to_iso8601()` and `user_format_to_strftime()` functions
+
+**Example:**
 
 - Input CSV has dates like "11/23/2025" or "2025-11-23"
 - Transform config specifies the input format which could be either "ISO-8601" or a date format string, e.g. "MM/DD/YYYY ZZZ" where MM is two digits for month, DD is two digits for day, YYYY is four digits for year and ZZZ is three letters for a timezone abbreviation. Another example is "YYYY-MM-DD" where month and day could be one or two digits including a leading zero, e.g. "03" for March, the third month.
 - Output JSON stores dates in standardized ISO-8601 format with timezone it available (e.g., "2025-11-23T00:00:00-05:00")
 
-### 2. Date Display Format in Card Configuration
+```json
+{
+  "column_types": {
+    "appointment_date": {
+      "type": "date",
+      "input_format": "YYYY-MM-DD",
+      "timezone": "America/New_York"
+    }
+  }
+}
+```
 
-Add a way to specify a display format for dates in our card configuration to convert ISO-8601 Dates in our database to user-friendly formats for display in card UI.
+### ✅ 2. Date Display Format in Card Configuration (COMPLETED)
 
-**Example use case:**
+Added support for displaying dates in user-friendly formats in card UI. The `format_date()` function was already implemented and works with both simple date strings and ISO-8601 formatted dates.
 
-- Database stores: "2025-11-23T00:00:00-05:00"
-- Card config specifies format: "MMM DD, YYYY" or "MM/DD/YYYY"
-- UI displays: "Nov 23, 2025" or "11/23/2025"
+**Implementation:**
 
-### 3. Currency Parsing in CSV-to-JSON Transform
+- `format_date(date_field, format_string)` function available in card templates
+- Updated server.py to handle timezone-aware ISO-8601 dates
+- `days_from_now()` and `days_after()` functions updated to support timezone-aware dates
 
-Add support in our CSV-to-JSON transform format that allows us to describe CSV columns containing numbers as currency amounts in dollars accepting optional dollar signs and decimal points.
+**Example:**
+
+```json
+{
+  "template": {
+    "datetime": "{format_date($.date, '%b %d')} at {$.time}",
+    "days_until": "{days_from_now($.date)}"
+  }
+}
+```
+
+### ✅ 3. Currency Parsing in CSV-to-JSON Transform (COMPLETED)
+
+Added support in our CSV-to-JSON transform format that allows us to describe CSV columns containing numbers as currency amounts in dollars accepting optional dollar signs and decimal points.
+
+**Implementation:**
+
+- Added `convert_currency_to_numeric()` function in batch_process.py
+- Updated `cleanse()` function to apply currency type conversion
+- Supports all specified input formats and converts to standardized numeric values
+- Configuration example: `{"column_types": {"amount": {"type": "currency"}}}`
 
 **Supported input formats:**
 
-- `23.4700`
-- `$23.47`
-- `$23`
-- `23`
-- `23.`
-- `.47`
-- `0.47`
-- `$0.47`
+- `23.4700` → 23.47
+- `$23.47` → 23.47
+- `$23` → 23.0
+- `23` → 23.0
+- `23.` → 23.0
+- `.47` → 0.47
+- `0.47` → 0.47
+- `$0.47` → 0.47
 
-**Output:** Standardized numeric format or currency object in JSON document stored in PersonStore
+**Output:** Standardized numeric format stored in JSON document (e.g., 23.47)
 
-### 4. Currency Display Format in Card Configuration JSON
+**Example:**
 
-Add a way to specify a display format for currency amounts in dollars in our card configuration. Shows only two decimal places to right of decimal. Shows comma as thousands separator.
+```json
+{
+  "column_types": {
+    "copay_amount": {
+      "type": "currency"
+    }
+  }
+}
+```
+
+### ✅ 4. Currency Display Format in Card Configuration (COMPLETED)
+
+Added a way to specify a display format for currency amounts in dollars in our card configuration. Shows only two decimal places to right of decimal. Shows comma as thousands separator.
+
+**Implementation:**
+
+- Added `currency()` function to `ComputeFunctions` class in server.py
+- Updated `ExpressionParser` to recognize currency() function calls
+- Formats numeric values with dollar sign, comma thousands separator, and exactly two decimal places
+- Template usage: `{currency($.amount)}`
 
 **Example use case:**
 
-- Database stores: `1089.99000` (numeric)
-- Card config template format: "currency($.amount)"
+- Database stores: `1089.99` (numeric)
+- Card config template: `{currency($.amount)}`
 - UI displays: "$1,089.99"
+
+**Example:**
+
+```json
+{
+  "template": {
+    "copay": "{currency($.costs.copay)}",
+    "total": "{currency($.costs.total)}"
+  }
+}
+```
+
+## Future Enhancements
 
 ### 5. Interactive CSV Transform Configuration Tool
 

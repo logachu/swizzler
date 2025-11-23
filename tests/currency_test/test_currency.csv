@@ -1,0 +1,9 @@
+patient_id,item,amount
+EPI123,Service A,$23.47
+EPI123,Service B,$1089.99
+EPI123,Service C,23
+EPI123,Service D,.47
+EPI123,Service E,23.4700
+EPI123,Service F,$0.47
+EPI123,Service G,0.47
+EPI123,Service H,23.
