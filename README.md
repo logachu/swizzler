@@ -17,6 +17,7 @@ To accomplish this high-level goal we have the following sub-goals:
   * support sums of values e.g. "total cost: ${sum(person.bills[*].total)}
 * Support typed data including dates and currency values
 * Support sorting arrays of objects by field values including all support comparable types: strings dates, currencies
+* Support filtering arrays of objects e.g. filtering only future appointments or active prescriptions
 
 ## Proposed solution
 
