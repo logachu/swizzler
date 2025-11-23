@@ -30,7 +30,8 @@ Access data from the current context using JSONPath expressions.
       "dosage": "{$.dosage} - {$.frequency}",
       "prescriber": "{$.prescriber.name}, {$.prescriber.specialty}",
       "refill_count": "{len($.refills)}",
-      "days_until": "{days_from_now($.appointment_date)}"
+      "days_until": "{days_from_now($.appointment_date)}",
+      "days_overdue": "{days_after($.due_date)}"
     }
   }
 }
@@ -50,7 +51,8 @@ NOTE: array slice syntax could be added as a future enhancement, but I couldnt' 
 - `len(array)` - Count items in an array
 - `sum(array.numericField)` - Sum numeric values
 - `format_date(date, format)` - Format dates (e.g., `'%b %d, %Y'`)
-- `days_from_now(date)` - Calculate days until/since a date
+- `days_from_now(date)` - Calculate days until/since a date (returns string like "5 days from now")
+- `days_after(date)` - Calculate days after a date (returns number: positive if overdue, negative if upcoming, 0 if today)
 
 NOTE: could add other date-related functions that resolve to hours, weeks, months, years, etc. or a generic time_from_now('days', "01-01-1970")
 
