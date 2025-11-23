@@ -9,7 +9,7 @@ Add support in our CSV-to-JSON transform format that allows us to describe CSV c
 **Example use case:**
 
 - Input CSV has dates like "11/23/2025" or "2025-11-23"
-- Transform config specifies the input format which could be either "ISO-8601" or a date format string, e.g. "MM/DD/YYYY" or "YYYY-MM-DD" where month and day could be one or two digits including a leading zero, e.g. "03" for March, the third month.
+- Transform config specifies the input format which could be either "ISO-8601" or a date format string, e.g. "MM/DD/YYYY ZZZ" where MM is two digits for month, DD is two digits for day, YYYY is four digits for year and ZZZ is three letters for a timezone abbreviation. Another example is "YYYY-MM-DD" where month and day could be one or two digits including a leading zero, e.g. "03" for March, the third month.
 - Output JSON stores dates in standardized ISO-8601 format with timezone it available (e.g., "2025-11-23T00:00:00-05:00")
 
 ### 2. Date Display Format in Card Configuration
