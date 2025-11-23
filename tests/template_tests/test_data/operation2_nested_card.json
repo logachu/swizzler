@@ -1,0 +1,12 @@
+{
+  "attribute": "_EHR/prescriptions",
+  "foreach": "$[*]",
+  "templates": {
+    "root": {
+      "title": "{$.medication_name}",
+      "full_info": "@medication_details"
+    },
+    "medication_details": "{$.dosage} - @prescriber_specialty",
+    "prescriber_specialty": "{$.prescriber.specialty}"
+  }
+}

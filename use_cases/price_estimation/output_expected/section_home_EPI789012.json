@@ -8,7 +8,7 @@
             "datetime": "Nov 25 at 11:00",
             "location": "Skin Care Clinic",
             "procedure_count": "2 procedure(s)",
-            "days_until": "16 days from now"
+            "days_until": "2 days from now"
         },
         {
             "title": "Dr. Robert Brown",
@@ -16,7 +16,7 @@
             "datetime": "Nov 28 at 15:00",
             "location": "Neuro Center",
             "procedure_count": "2 procedure(s)",
-            "days_until": "19 days from now"
+            "days_until": "5 days from now"
         }
     ]
 }

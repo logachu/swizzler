@@ -1,0 +1,18 @@
+{
+  "attribute": "_EHR/prescriptions",
+  "foreach": "$[*]",
+  "filter_by": {
+    "field": "status",
+    "value": "active"
+  },
+  "templates": {
+    "root": {
+      "title": "{$.medication_name}",
+      "subtitle": "{$.dosage} - {$.frequency}",
+      "prescriber": "@prescriber_info",
+      "status_display": "@medication_status"
+    },
+    "prescriber_info": "Prescribed by {$.prescriber.name}, {$.prescriber.specialty}",
+    "medication_status": "Status: {$.status}"
+  }
+}

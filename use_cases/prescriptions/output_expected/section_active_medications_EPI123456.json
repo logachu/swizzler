@@ -7,8 +7,8 @@
             "subtitle": "10mg - once daily",
             "prescriber": "Prescribed by Dr. Sarah Johnson, Cardiology",
             "refill_count": "4 refill(s) on record",
-            "?last_refill": "2024-10-15",
-            "?pharmacy": "CVS Pharmacy",
+            "last_refill": "Oct 15, 2024",
+            "pharmacy": "CVS Pharmacy",
             "status": "active"
         },
         {
@@ -16,8 +16,8 @@
             "subtitle": "500mg - twice daily",
             "prescriber": "Prescribed by Dr. Michael Chen, Endocrinology",
             "refill_count": "3 refill(s) on record",
-            "?last_refill": "2024-08-28",
-            "?pharmacy": "Walgreens",
+            "last_refill": "Aug 28, 2024",
+            "pharmacy": "Walgreens",
             "status": "active"
         },
         {
@@ -25,8 +25,8 @@
             "subtitle": "20mg - once daily at bedtime",
             "prescriber": "Prescribed by Dr. Sarah Johnson, Cardiology",
             "refill_count": "3 refill(s) on record",
-            "?last_refill": "2024-08-09",
-            "?pharmacy": "CVS Pharmacy",
+            "last_refill": "Aug 09, 2024",
+            "pharmacy": "CVS Pharmacy",
             "status": "active"
         }
     ]

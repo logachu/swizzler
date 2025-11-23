@@ -7,30 +7,30 @@
             "subtitle": "75mcg - once daily before breakfast",
             "prescriber": "Prescribed by Dr. Robert Taylor, Endocrinology",
             "status": "active",
-            "start_date": "Started 2023-11-20",
-            "?end_date": "Ended ",
+            "start_date": "Started Nov 20, 2023",
+            "end_date": "Ended ",
             "refill_count": "4 refill(s)",
-            "?last_refill": "Last filled 2024-08-16"
+            "last_refill": "Last filled Aug 16, 2024"
         },
         {
             "title": "Albuterol Inhaler",
             "subtitle": "90mcg - 2 puffs every 4-6 hours as needed",
             "prescriber": "Prescribed by Dr. Emily White, Pulmonology",
             "status": "active",
-            "start_date": "Started 2024-06-10",
-            "?end_date": "Ended ",
+            "start_date": "Started Jun 10, 2024",
+            "end_date": "Ended ",
             "refill_count": "2 refill(s)",
-            "?last_refill": "Last filled 2024-09-08"
+            "last_refill": "Last filled Sep 08, 2024"
         },
         {
             "title": "Omeprazole",
             "subtitle": "20mg - once daily",
             "prescriber": "Prescribed by Dr. James Brown, Gastroenterology",
             "status": "active",
-            "start_date": "Started 2024-04-01",
-            "?end_date": "Ended ",
+            "start_date": "Started Apr 01, 2024",
+            "end_date": "Ended ",
             "refill_count": "3 refill(s)",
-            "?last_refill": "Last filled 2024-09-28"
+            "last_refill": "Last filled Sep 28, 2024"
         }
     ]
 }

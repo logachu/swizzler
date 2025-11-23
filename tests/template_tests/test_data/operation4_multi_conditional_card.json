@@ -1,0 +1,27 @@
+{
+  "attribute": "_EHR/prescriptions",
+  "foreach": "$[*]",
+  "templates": {
+    "root": {
+      "title": "{$.medication_name}",
+      "refill_indicator": "@refill_status"
+    },
+    "refill_status": {
+      "conditions": [
+        {
+          "when": "len($.refills) == 0",
+          "show": "🔴 No refills - contact prescriber immediately"
+        },
+        {
+          "when": "len($.refills) < 2",
+          "show": "🟡 Low refills - {len($.refills)} remaining"
+        },
+        {
+          "when": "len($.refills) >= 2",
+          "show": "🟢 {len($.refills)} refills available"
+        }
+      ],
+      "default": "Unknown refill status"
+    }
+  }
+}

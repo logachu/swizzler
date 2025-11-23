@@ -1,0 +1,11 @@
+{
+  "attribute": "_EHR/prescriptions",
+  "foreach": "$[*]",
+  "templates": {
+    "root": {
+      "title": "{$.medication_name}",
+      "procedures_list": "{$.procedures|@procedure_item}"
+    },
+    "procedure_item": "• {$.name} ({$.status})"
+  }
+}

@@ -8,7 +8,7 @@
             "copay": "Copay: $55.95",
             "hospital_billing": "Hospital: $321.90",
             "professional_billing": "Professional: $203.07",
-            "insurance_note": "Covered by insurance"
+            "insurance_note": "?Covered by insurance"
         },
         {
             "title": "Consultation",
@@ -16,7 +16,7 @@
             "copay": "Copay: $43.61",
             "hospital_billing": "Hospital: $245.46",
             "professional_billing": "Professional: $152.70",
-            "insurance_note": "Covered by insurance"
+            "insurance_note": "?Covered by insurance"
         }
     ]
 }

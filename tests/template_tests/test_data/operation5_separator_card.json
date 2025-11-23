@@ -1,0 +1,11 @@
+{
+  "attribute": "_EHR/prescriptions",
+  "foreach": "$[*]",
+  "templates": {
+    "root": {
+      "title": "{$.medication_name}",
+      "procedures_comma": "{$.procedures|@procedure_name|separator=', '}"
+    },
+    "procedure_name": "{$.name}"
+  }
+}
