@@ -47,6 +47,22 @@ Add a way to specify a display format for currency amounts in dollars in our car
 - Thousands separators
 - Negative value formatting (e.g., "($10.00)" vs "-$10.00")
 
+### 5. Interactive CSV Transform Configuration Tool
+Create an interactive tool for creating the csv_transform.json files by showing an example input CSV, a csv_transform.json editor TextBox and the resulting JSON document Array output.
+
+**Features:**
+- **Input CSV viewer/editor**: Display or paste example CSV data
+- **Transform config editor**: TextBox for editing csv_transform.json with syntax highlighting
+- **Live output preview**: Real-time display of the resulting JSON output as the config is edited
+- **Validation**: Highlight errors in the configuration or transformation process
+- **Templates**: Provide common configuration patterns as starting points
+
+**Benefits:**
+- Reduces trial-and-error when creating new transformations
+- Provides immediate feedback on configuration changes
+- Helps users understand the relationship between CSV structure, config, and JSON output
+- Makes the system more accessible to non-technical users
+
 ---
 
 ## Notes
