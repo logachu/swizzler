@@ -185,8 +185,17 @@ class ComputeFunctions:
         """Return relative days from now."""
         try:
             dt = date_parser.parse(date_str)
-            today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-            delta = (dt.replace(hour=0, minute=0, second=0, microsecond=0) - today).days
+            # Handle timezone-aware datetimes
+            if dt.tzinfo is not None:
+                # Get current time in the same timezone as the parsed date
+                from zoneinfo import ZoneInfo
+                today = datetime.now(dt.tzinfo).replace(hour=0, minute=0, second=0, microsecond=0)
+                dt = dt.replace(hour=0, minute=0, second=0, microsecond=0)
+            else:
+                today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                dt = dt.replace(hour=0, minute=0, second=0, microsecond=0)
+
+            delta = (dt - today).days
 
             if delta == 0:
                 return "today"
@@ -211,8 +220,17 @@ class ComputeFunctions:
         """
         try:
             dt = date_parser.parse(date_str)
-            today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-            delta = (today - dt.replace(hour=0, minute=0, second=0, microsecond=0)).days
+            # Handle timezone-aware datetimes
+            if dt.tzinfo is not None:
+                # Get current time in the same timezone as the parsed date
+                from zoneinfo import ZoneInfo
+                today = datetime.now(dt.tzinfo).replace(hour=0, minute=0, second=0, microsecond=0)
+                dt = dt.replace(hour=0, minute=0, second=0, microsecond=0)
+            else:
+                today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                dt = dt.replace(hour=0, minute=0, second=0, microsecond=0)
+
+            delta = (today - dt).days
             return delta
         except Exception:
             return 0

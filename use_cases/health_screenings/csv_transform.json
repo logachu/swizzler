@@ -3,6 +3,18 @@
     "name": "_EHR/health_screenings",
     "group_by": "EPI"
   },
+  "column_types": {
+    "due_date": {
+      "type": "date",
+      "input_format": "YYYY-MM-DD",
+      "timezone": "America/New_York"
+    },
+    "last_completed_date": {
+      "type": "date",
+      "input_format": "YYYY-MM-DD",
+      "timezone": "America/New_York"
+    }
+  },
   "template": {
     "group_by": "screening_id",
     "sort_by": {

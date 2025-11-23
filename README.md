@@ -61,6 +61,13 @@ The transformation is controlled by `csv_transform.json`:
     "name": "_EHR/appointments",
     "group_by": "EPI"
   },
+  "column_types": {
+    "appointment_date": {
+      "type": "date",
+      "input_format": "YYYY-MM-DD",
+      "timezone": "America/New_York"
+    }
+  },
   "template": {
     "group_by": "appointment_id",
     "template": {
@@ -78,6 +85,14 @@ The transformation is controlled by `csv_transform.json`:
 * `group_by`: Groups rows by a column value to create unique objects
 * `collect`: Gathers all rows as separate array items (allows duplicates)
 * `{column_name}`: References CSV column values
+* `column_types`: Optional type annotations for CSV columns
+  * `type: "date"`: Converts date strings to ISO-8601 format
+  * `input_format`: Optional date format specification. Can be:
+    * `"ISO-8601"` - for ISO-8601 formatted dates
+    * User-friendly format like `"YYYY-MM-DD"`, `"MM/DD/YYYY"`, `"DD/MM/YYYY"`
+    * Format with timezone: `"MM/DD/YYYY ZZZ"` where ZZZ is timezone abbreviation (EST, PST, etc.)
+    * If omitted, auto-detects common formats
+  * `timezone`: Optional timezone name (e.g., "America/New_York"). If omitted and date string doesn't contain timezone, outputs ISO-8601 without timezone offset
 
 #### 2. server.py - Prototype Mobile App Backend
 
