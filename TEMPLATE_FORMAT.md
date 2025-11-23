@@ -53,6 +53,7 @@ NOTE: array slice syntax could be added as a future enhancement, but I couldnt' 
 - `format_date(date, format)` - Format dates (e.g., `'%b %d, %Y'`)
 - `days_from_now(date)` - Calculate days until/since a date (returns string like "5 days from now")
 - `days_after(date)` - Calculate days after a date (returns number: positive if overdue, negative if upcoming, 0 if today)
+- `currency(amount)` - Format numeric value as currency with dollar sign, comma thousands separator, and exactly two decimal places (e.g., 1089.99 → "$1,089.99")
 
 NOTE: could add other date-related functions that resolve to hours, weeks, months, years, etc. or a generic time_from_now('days', "01-01-1970")
 
@@ -86,11 +87,11 @@ Templates can accept parameters. Here 'label' and 'amount' are template paramete
 {
   "templates": {
     "root": {
-      "copay": "@currency('Copay', $.costs.copay)",
-      "deductible": "@currency('Deductible', $.costs.deductible)",
-      "total": "@currency('Total', $.costs.total)"
+      "copay": "@currency_line('Copay', $.costs.copay)",
+      "deductible": "@currency_line('Deductible', $.costs.deductible)",
+      "total": "@currency_line('Total', $.costs.total)"
     },
-    "currency(label, amount)": "{label}: {format_currency(amount)}"
+    "currency_line(label, amount)": "{label}: {currency(amount)}"
   }
 }
 ```
@@ -318,7 +319,7 @@ List templates can use conditionals and nested references:
 }
 ```
 
-### Example 2: Billing Card with Parameterized Templates
+### Example 2: Billing Card with Parameterized Templates and Currency Formatting
 
 ```json
 {
@@ -328,13 +329,13 @@ List templates can use conditionals and nested references:
     "root": {
       "title": "Medical Bill - {$.provider_name}",
       "status": "@payment_status",
-      "copay": "@currency($.costs.copay, 'Copay')",
-      "deductible": "@currency($.costs.deductible, 'Deductible')",
-      "total": "@currency($.costs.total, 'Total Estimate')",
+      "copay": "@currency_line('Copay', $.costs.copay)",
+      "deductible": "@currency_line('Deductible', $.costs.deductible)",
+      "total": "@currency_line('Total Estimate', $.costs.total)",
       "line_items": "{$.items|@line_item|separator='\n'}",
       "?payment_plan": "@payment_plan_info"
     },
-    "currency(amount, label)": "{label}: ${amount}",
+    "currency_line(label, amount)": "{label}: {currency(amount)}",
     "payment_status": {
       "conditions": [
         {
@@ -343,12 +344,12 @@ List templates can use conditionals and nested references:
         },
         {
           "when": "$.amount_due > 0",
-          "show": "💵 Amount due: ${$.amount_due}"
+          "show": "💵 Amount due: {currency($.amount_due)}"
         }
       ],
       "default": "✓ All bills paid"
     },
-    "line_item": "{$.description}: ${$.amount}",
+    "line_item": "{$.description}: {currency($.amount)}",
     "payment_plan_info": {
       "condition": "$.costs.total > 500",
       "if_true": "Payment plans available - speak to financial counselor"

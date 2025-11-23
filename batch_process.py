@@ -180,6 +180,53 @@ def convert_date_to_iso8601(date_str: str, input_format: Optional[str] = None, t
         return date_str
 
 
+def convert_currency_to_numeric(currency_str: str) -> float:
+    """
+    Convert a currency string to a numeric value.
+
+    Supports various input formats:
+    - $23.47, $23, $0.47
+    - 23.4700, 23, 0.47
+    - .47, 23.
+
+    Args:
+        currency_str: The currency string to convert
+
+    Returns:
+        Numeric value as float
+
+    Examples:
+        "$23.47" -> 23.47
+        "$23" -> 23.0
+        "23.4700" -> 23.47
+        ".47" -> 0.47
+        "23." -> 23.0
+    """
+    if not currency_str or not isinstance(currency_str, str):
+        return 0.0
+
+    # Strip whitespace
+    currency_str = currency_str.strip()
+
+    if not currency_str:
+        return 0.0
+
+    try:
+        # Remove dollar sign and commas
+        cleaned = currency_str.replace("$", "").replace(",", "").strip()
+
+        # Handle empty string after cleaning
+        if not cleaned:
+            return 0.0
+
+        # Convert to float
+        return float(cleaned)
+
+    except ValueError as e:
+        print(f"Warning: Could not parse currency '{currency_str}': {e}, returning 0.0")
+        return 0.0
+
+
 def cleanse(csv_rows: List[Dict[str, Any]], column_types: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
     """
     Cleanse and validate CSV data, applying type conversions as specified.
@@ -210,6 +257,10 @@ def cleanse(csv_rows: List[Dict[str, Any]], column_types: Optional[Dict[str, Any
                     input_format = type_spec.get("input_format")
                     timezone = type_spec.get("timezone")  # Optional, None if not specified
                     cleaned_row[column_name] = convert_date_to_iso8601(value, input_format, timezone)
+
+                elif isinstance(type_spec, dict) and type_spec.get("type") == "currency":
+                    # Convert currency columns to numeric
+                    cleaned_row[column_name] = convert_currency_to_numeric(value)
 
         cleansed_rows.append(cleaned_row)
 

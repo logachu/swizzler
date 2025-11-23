@@ -1,0 +1,21 @@
+{
+  "column_types": {
+    "amount": {
+      "type": "currency"
+    }
+  },
+  "attribute": {
+    "name": "test_currency",
+    "group_by": "patient_id"
+  },
+  "template": {
+    "items": {
+      "collect": [
+        {
+          "item": "{item}",
+          "amount": "{amount}"
+        }
+      ]
+    }
+  }
+}

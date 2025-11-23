@@ -1,0 +1,36 @@
+{
+  "items": [
+    {
+      "item": "Service A",
+      "amount": 23.47
+    },
+    {
+      "item": "Service B",
+      "amount": 1089.99
+    },
+    {
+      "item": "Service C",
+      "amount": 23.0
+    },
+    {
+      "item": "Service D",
+      "amount": 0.47
+    },
+    {
+      "item": "Service E",
+      "amount": 23.47
+    },
+    {
+      "item": "Service F",
+      "amount": 0.47
+    },
+    {
+      "item": "Service G",
+      "amount": 0.47
+    },
+    {
+      "item": "Service H",
+      "amount": 23.0
+    }
+  ]
+}

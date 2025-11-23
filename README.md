@@ -66,6 +66,9 @@ The transformation is controlled by `csv_transform.json`:
       "type": "date",
       "input_format": "YYYY-MM-DD",
       "timezone": "America/New_York"
+    },
+    "copay_amount": {
+      "type": "currency"
     }
   },
   "template": {
@@ -87,12 +90,16 @@ The transformation is controlled by `csv_transform.json`:
 * `{column_name}`: References CSV column values
 * `column_types`: Optional type annotations for CSV columns
   * `type: "date"`: Converts date strings to ISO-8601 format
-  * `input_format`: Optional date format specification. Can be:
-    * `"ISO-8601"` - for ISO-8601 formatted dates
-    * User-friendly format like `"YYYY-MM-DD"`, `"MM/DD/YYYY"`, `"DD/MM/YYYY"`
-    * Format with timezone: `"MM/DD/YYYY ZZZ"` where ZZZ is timezone abbreviation (EST, PST, etc.)
-    * If omitted, auto-detects common formats
-  * `timezone`: Optional timezone name (e.g., "America/New_York"). If omitted and date string doesn't contain timezone, outputs ISO-8601 without timezone offset
+    * `input_format`: Optional date format specification. Can be:
+      * `"ISO-8601"` - for ISO-8601 formatted dates
+      * User-friendly format like `"YYYY-MM-DD"`, `"MM/DD/YYYY"`, `"DD/MM/YYYY"`
+      * Format with timezone: `"MM/DD/YYYY ZZZ"` where ZZZ is timezone abbreviation (EST, PST, etc.)
+      * If omitted, auto-detects common formats
+    * `timezone`: Optional timezone name (e.g., "America/New_York"). If omitted and date string doesn't contain timezone, outputs ISO-8601 without timezone offset
+  * `type: "currency"`: Converts currency strings to numeric values
+    * Supports formats: `$23.47`, `$23`, `23`, `.47`, `0.47`, `23.4700`, etc.
+    * Removes dollar signs and commas, converts to float
+    * Stores as standardized numeric value in JSON (e.g., 23.47)
 
 #### 2. server.py - Prototype Mobile App Backend
 
@@ -175,6 +182,7 @@ curl -H "X-EPI: EPI123456" http://localhost:8000/section/procedures/APT001
    * `{sum($.array)}` - Sum numeric values
    * `{format_date($.date, '%b %d')}` - Format dates
    * `{days_from_now($.date)}` - Relative date display
+   * `{currency($.amount)}` - Format as currency (e.g., "$1,089.99")
 4. **Conditional fields:** Prefix with `?` to omit if falsy
 
 **Path Variables:**

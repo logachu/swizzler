@@ -235,6 +235,41 @@ class ComputeFunctions:
         except Exception:
             return 0
 
+    @staticmethod
+    def currency(amount: Any) -> str:
+        """
+        Format a numeric value as currency with dollar sign, comma thousands separator,
+        and exactly two decimal places.
+
+        Args:
+            amount: Numeric value or string to format
+
+        Returns:
+            Formatted currency string (e.g., "$1,089.99")
+
+        Examples:
+            1089.99 -> "$1,089.99"
+            1089.99000 -> "$1,089.99"
+            23 -> "$23.00"
+            0.47 -> "$0.47"
+        """
+        try:
+            # Convert to float if it's a string
+            if isinstance(amount, str):
+                # Remove existing currency symbols and commas
+                cleaned = amount.replace("$", "").replace(",", "").strip()
+                numeric_value = float(cleaned)
+            elif isinstance(amount, (int, float)):
+                numeric_value = float(amount)
+            else:
+                return "$0.00"
+
+            # Format with comma thousands separator and 2 decimal places
+            return f"${numeric_value:,.2f}"
+
+        except (ValueError, TypeError):
+            return "$0.00"
+
 
 # ============================================================================
 # Expression Parser
@@ -428,6 +463,8 @@ class ExpressionParser:
                 return self.compute.days_from_now(str(arg_value))
             elif func_name == "days_after":
                 return self.compute.days_after(str(arg_value))
+            elif func_name == "currency":
+                return self.compute.currency(arg_value)
 
         # Otherwise, it's a JSONPath expression
         if expr.startswith('$'):

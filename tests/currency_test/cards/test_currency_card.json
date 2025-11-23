@@ -1,0 +1,9 @@
+{
+  "attribute": "test_currency",
+  "foreach": "$.items[*]",
+  "template": {
+    "item": "{$.item}",
+    "amount_raw": "{$.amount}",
+    "amount_formatted": "{currency($.amount)}"
+  }
+}
