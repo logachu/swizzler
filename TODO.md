@@ -121,7 +121,35 @@ Added a way to specify a display format for currency amounts in dollars in our c
 
 ## Future Enhancements
 
-### 5. Interactive CSV Transform Configuration Tool
+### 5. Separate server-side and client-side templates
+
+Create new syntax in templates to differentiate between templates that should be resolved on the server-side from those which should be passed on to the mobile client SDK to resolve on the client.
+
+### 6. Add type information to PersonStore JSON
+
+Since dates and currency are not supported types in JSON, we need to add type annotations to the JSON format to allow the server to decode the JSON values to the correct type.
+
+For example:
+```json
+{
+  "appointment_date": {
+     "@type": "date",
+     "@value": "2025-11-23T09:30:00-08:00"
+  }
+}
+```
+
+### 7. Handle expressions in templates
+
+We need to be able to do things like replace a date with "Tomorrow" if a date is after the next midnight from now, show "Yesterday" etc. This solution does already handle cases like "3 days from now" using the days_until/days_after_now functions.
+
+### 8. Design more flexible card description
+
+We could design a more universal card that allows combining flexible layout components to support more user cases.
+1. rather than the current Card / Card Item concepts, we gould have a Group / Card / Fragment hierarchy where a "group" corresponds to what we call a "card" today which is a rounded rect border with one or more cards within it. Cards have a separator between them and "fragments" or "components" or "widgets" are parts of a card such as a Row or Column with Text or Icons. Alternately we could explore allowing HTML/CSS rendering within cards or other existing Flutter packages to allow flexible layout. We don't want to re-invent a layout library ourselves unless it is fairly simple while giving enough flexibility to handle 80% of cases that would require a custom card type now.
+2. 
+
+### 9. Interactive CSV Transform Configuration Tool
 
 Create an interactive tool for creating the csv_transform.json files by showing an example input CSV, a csv_transform.json editor TextBox and the resulting JSON document Array output.
 
@@ -140,57 +168,50 @@ Create an interactive tool for creating the csv_transform.json files by showing 
 - Helps users understand the relationship between CSV structure, config, and JSON output
 - Makes the system more accessible to non-technical users
 
-### 6. Tutorial Examples for Developer Onboarding
+### 10. Tutorial Examples for Developer Onboarding
 
 Create a comprehensive tutorial series that teaches the system to new developers through progressive, step-by-step examples.
 
 **Tutorial Structure:**
 
-- Start with simple examples and gradually introduce complexity
-- Each tutorial builds on concepts from previous ones
-- Cover both csv_transform.json format and JSON card configuration format
-- Include working code, sample data, and expected outputs
-
-**Proposed Tutorial Sequence:**
-
 1. **Hello World**: Basic CSV to flat JSON
-   - Simple one-to-one field mapping
-   - Introduction to `{column_name}` syntax
+   + Simple one-to-one field mapping
+   + Introduction to `{column_name}` syntax
 
 2. **Nested Objects**: Creating hierarchical structures
-   - Grouping related fields into nested objects
-   - Understanding template structure
+   + Grouping related fields into nested objects
+   + Understanding template structure
 
 3. **Simple Arrays**: Using `collect` for one-to-many relationships
-   - Collecting multiple rows into an array
-   - When and why to use `collect`
+   + Collecting multiple rows into an array
+   + When and why to use `collect`
 
 4. **Grouping Data**: Using `group_by` for data organization
-   - Creating separate objects from grouped rows
-   - Understanding multi-level grouping
+   + Creating separate objects from grouped rows
+   + Understanding multi-level grouping
 
 5. **Sorting Arrays**: Introducing the `sort_by` feature
-   - Sorting by simple fields
-   - Sorting by nested fields with dot notation
-   - Different data types (numbers, dates, currency, strings)
+   + Sorting by simple fields
+   + Sorting by nested fields with dot notation
+   + Different data types (numbers, dates, currency, strings)
 
 6. **Complex Nested Structures**: Combining concepts
-   - Multiple levels of nesting
-   - Mixed arrays and objects
-   - Real-world healthcare data example
+   + Multiple levels of nesting
+   + Mixed arrays and objects
+   + Real-world healthcare data example
 
 7. **Card Configuration Basics**: Displaying data in UI
-   - JSONPath expressions for data extraction
-   - Card templates and sections
-   - Linking PersonStore data to UI components
+   + JSONPath expressions for data extraction
+   + Card templates and sections
+   + Linking PersonStore data to UI components
 
 8. **Advanced Card Features**: Dynamic UI rendering
-   - Conditional rendering
-   - Compute functions: `len()`, `sum()`, `format_date()`, `days_from_now()`
-   - Counting items: "You have {len($.prescriptions)} active prescriptions"
-   - Summing values: "Total copay: ${sum($.procedures[*].costs.copay)}"
-   - Date formatting and relative dates
-   - Building complete card-based interfaces
+   + Conditional rendering
+   + Compute functions: `len()`, `sum()`, `format_date()`, `days_from_now()`
+   + Counting items: "You have {len($.prescriptions)} active prescriptions"
+   + Summing values: "Total copay: ${sum($.procedures[*].costs.copay)}"
+   + Date formatting and relative dates
+   + Building complete card-based interfaces
 
 **Benefits:**
 
@@ -199,7 +220,7 @@ Create a comprehensive tutorial series that teaches the system to new developers
 - Serves as living documentation
 - Provides reusable templates for common scenarios
 
-### 7. Text Formatting in Templates
+### 11. Text Formatting in Templates
 
 Add support for text formatting in card configuration templates to enable richer UI displays with bold text, links, and other formatting.
 

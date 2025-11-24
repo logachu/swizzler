@@ -1,6 +1,6 @@
 # CSV Transform Schema Reference
 
-This document provides the definitive reference for the `csv_transform.json` configuration format.
+Reference documentation describing the format for CSV-to-JSON transform files. These are JSON files that describe how to transform denormalized data from a CSV file that is assumed to haveinto a 
 
 ## Overview
 
@@ -8,12 +8,13 @@ The CSV transform schema uses an `@`-prefixed format to clearly distinguish proc
 
 **Key Principle:** Keys with `@` prefix are processing directives (not in output). Keys without `@` are output field names.
 
+For details on column type conversions, see [Column Types](COLUMN_TYPES.md).
 ## Schema Structure
 
 ```jsonc
 {
   "@attribute": {
-    "name": "attribute_name",
+    "name": "namespace/attribute",
     "group_by": "column_name",
     "column_types": { /* ... */ },
     "@array": { /* ... */ }  // OR "@object": { /* ... */ }
