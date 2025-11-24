@@ -21,6 +21,28 @@ Access data from the current context using JSONPath expressions.
 
 **Example:**
 
+Input data (medication object):
+
+```json
+{
+  "medication_name": "Lisinopril",
+  "dosage": "10mg",
+  "frequency": "Once daily",
+  "prescriber": {
+    "name": "Dr. Sarah Johnson",
+    "specialty": "Cardiology"
+  },
+  "refills": [
+    {"refill_date": "2025-09-15"},
+    {"refill_date": "2025-10-20"}
+  ],
+  "appointment_date": "2025-12-01",
+  "due_date": "2025-11-20"
+}
+```
+
+Template configuration:
+
 ```json
 {
   ...Other Card or Card Collection Configuration
@@ -34,6 +56,19 @@ Access data from the current context using JSONPath expressions.
       "days_overdue": "{days_after($.due_date)}"
     }
   }
+}
+```
+
+Final output after substitution:
+
+```json
+{
+  "title": "Lisinopril",
+  "dosage": "10mg - Once daily",
+  "prescriber": "Dr. Sarah Johnson, Cardiology",
+  "refill_count": "2",
+  "days_until": "8 days from now",
+  "days_overdue": "-3"
 }
 ```
 
