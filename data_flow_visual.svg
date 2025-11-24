@@ -1,0 +1,240 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 900" style="background-color: white;">
+  <defs>
+    <!-- Arrow marker -->
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#666" />
+    </marker>
+
+    <!-- Styles -->
+    <style>
+      .box { stroke: #333; stroke-width: 2; }
+      .csv-box { fill: #fff4e6; }
+      .json-box { fill: #f3e5f5; }
+      .card-box { fill: #fce4ec; }
+      .title { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; fill: #333; }
+      .code { font-family: 'Courier New', monospace; font-size: 12px; fill: #000; }
+      .field-highlight { fill: #ffeb3b; opacity: 0.3; }
+      .arrow { stroke: #666; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .arrow-label { font-family: Arial, sans-serif; font-size: 10px; fill: #666; }
+      .transform-label { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; fill: #1976d2; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="700" y="30" text-anchor="middle" class="title" style="font-size: 20px;">Data Flow: CSV → PersonStore JSON → Rendered Card</text>
+
+  <!-- CSV Data Block -->
+  <rect x="20" y="60" width="400" height="780" class="box csv-box" rx="5"/>
+  <text x="220" y="85" text-anchor="middle" class="title">📄 Input CSV</text>
+  <text x="220" y="105" text-anchor="middle" style="font-size: 11px; fill: #666;">price_estimates.csv</text>
+
+  <!-- CSV Header -->
+  <text x="30" y="135" class="code" style="font-weight: bold; font-size: 11px;">CSV Columns:</text>
+
+  <!-- CSV Row 1 Header -->
+  <rect x="30" y="145" width="380" height="20" style="fill: #e0e0e0;"/>
+  <text x="35" y="160" class="code" style="font-size: 10px;">EPI, appointment_id, appointment_date, appointment_time, provider_name, provider_specialty, ...</text>
+
+  <!-- CSV Row 1 -->
+  <text x="30" y="190" class="code" style="font-weight: bold;">Row 1:</text>
+  <text x="30" y="210" class="code">EPI: EPI123456</text>
+  <text x="30" y="230" class="code">appointment_id: APT001</text>
+
+  <!-- Highlight appointment_date -->
+  <rect x="30" y="237" width="360" height="15" class="field-highlight" id="csv-date"/>
+  <text x="30" y="250" class="code">appointment_date: 2025-11-15</text>
+
+  <text x="30" y="270" class="code">appointment_time: 9:00</text>
+
+  <!-- Highlight provider_name -->
+  <rect x="30" y="277" width="360" height="15" class="field-highlight" id="csv-provider"/>
+  <text x="30" y="290" class="code">provider_name: Dr. Sarah Johnson</text>
+
+  <!-- Highlight provider_specialty -->
+  <rect x="30" y="297" width="360" height="15" class="field-highlight" id="csv-specialty"/>
+  <text x="30" y="310" class="code">provider_specialty: Cardiology</text>
+
+  <text x="30" y="330" class="code">location: Main Hospital - Room 301</text>
+
+  <!-- Highlight procedure_name -->
+  <rect x="30" y="337" width="360" height="15" class="field-highlight" id="csv-proc-name"/>
+  <text x="30" y="350" class="code">procedure_code: PROC001</text>
+  <text x="30" y="370" class="code">procedure_name: EKG Test</text>
+
+  <!-- Highlight copay -->
+  <rect x="30" y="377" width="360" height="15" class="field-highlight" id="csv-copay"/>
+  <text x="30" y="390" class="code">estimated_copay: $42.20</text>
+
+  <text x="30" y="410" class="code">hospital_billing: $158.55</text>
+  <text x="30" y="430" class="code">professional_billing: $120.35</text>
+
+  <!-- CSV Row 2 -->
+  <text x="30" y="465" class="code" style="font-weight: bold;">Row 2:</text>
+  <text x="30" y="485" class="code">EPI: EPI123456</text>
+  <text x="30" y="505" class="code">appointment_id: APT001  (same appointment)</text>
+  <text x="30" y="525" class="code">appointment_date: 2025-11-15</text>
+  <text x="30" y="545" class="code">appointment_time: 9:00</text>
+  <text x="30" y="565" class="code">provider_name: Dr. Sarah Johnson</text>
+  <text x="30" y="585" class="code">provider_specialty: Cardiology</text>
+  <text x="30" y="605" class="code">location: Main Hospital - Room 301</text>
+  <text x="30" y="625" class="code">procedure_code: PROC002</text>
+  <text x="30" y="645" class="code">procedure_name: Blood Pressure Monitoring</text>
+  <text x="30" y="665" class="code">estimated_copay: $20.94</text>
+  <text x="30" y="685" class="code">...</text>
+
+  <!-- CSV Row 3 -->
+  <text x="30" y="720" class="code" style="font-weight: bold;">Row 3:</text>
+  <text x="30" y="740" class="code">EPI: EPI123456</text>
+  <text x="30" y="760" class="code">appointment_id: APT001  (same appointment)</text>
+  <text x="30" y="780" class="code">procedure_code: PROC003</text>
+  <text x="30" y="800" class="code">procedure_name: Consultation</text>
+  <text x="30" y="820" class="code">...</text>
+
+  <!-- PersonStore JSON Block -->
+  <rect x="500" y="60" width="420" height="780" class="box json-box" rx="5"/>
+  <text x="710" y="85" text-anchor="middle" class="title">🗄️ PersonStore JSON</text>
+  <text x="710" y="105" text-anchor="middle" style="font-size: 11px; fill: #666;">EPI123456__EHR_appointments.json</text>
+
+  <!-- JSON Content -->
+  <text x="515" y="135" class="code">[</text>
+  <text x="530" y="155" class="code">{</text>
+  <text x="545" y="175" class="code">"appointment_id": "APT001",</text>
+
+  <!-- Highlight date -->
+  <rect x="545" y="182" width="360" height="15" class="field-highlight" id="json-date"/>
+  <text x="545" y="195" class="code">"date": "2025-11-15T00:00:00",</text>
+
+  <text x="545" y="215" class="code">"time": "9:00",</text>
+  <text x="545" y="235" class="code">"provider": {</text>
+
+  <!-- Highlight provider.name -->
+  <rect x="560" y="242" width="345" height="15" class="field-highlight" id="json-provider"/>
+  <text x="560" y="255" class="code">"name": "Dr. Sarah Johnson",</text>
+
+  <!-- Highlight provider.specialty -->
+  <rect x="560" y="262" width="345" height="15" class="field-highlight" id="json-specialty"/>
+  <text x="560" y="275" class="code">"specialty": "Cardiology"</text>
+
+  <text x="545" y="295" class="code">},</text>
+  <text x="545" y="315" class="code">"location": "Main Hospital - Room 301",</text>
+
+  <!-- Procedures array -->
+  <text x="545" y="335" class="code">"procedures": [</text>
+  <text x="560" y="355" class="code">{</text>
+  <text x="575" y="375" class="code">"code": "PROC001",</text>
+
+  <!-- Highlight procedure name -->
+  <rect x="575" y="382" width="330" height="15" class="field-highlight" id="json-proc-name"/>
+  <text x="575" y="395" class="code">"name": "EKG Test",</text>
+
+  <text x="575" y="415" class="code">"costs": {</text>
+
+  <!-- Highlight copay -->
+  <rect x="590" y="422" width="315" height="15" class="field-highlight" id="json-copay"/>
+  <text x="590" y="435" class="code">"copay": "$42.20",</text>
+
+  <text x="590" y="455" class="code">"hospital": "$158.55",</text>
+  <text x="590" y="475" class="code">"professional": "$120.35"</text>
+  <text x="575" y="495" class="code">}</text>
+  <text x="560" y="515" class="code">},</text>
+  <text x="560" y="535" class="code">{ /* PROC002 */ },</text>
+  <text x="560" y="555" class="code">{ /* PROC003 */ }</text>
+  <text x="545" y="575" class="code">]</text>
+  <text x="530" y="595" class="code">}</text>
+  <text x="515" y="615" class="code">]</text>
+
+  <!-- Transformation note -->
+  <text x="710" y="660" text-anchor="middle" style="font-size: 12px; fill: #666; font-style: italic;">3 CSV rows grouped into</text>
+  <text x="710" y="680" text-anchor="middle" style="font-size: 12px; fill: #666; font-style: italic;">1 appointment with</text>
+  <text x="710" y="700" text-anchor="middle" style="font-size: 12px; fill: #666; font-style: italic;">3 nested procedures</text>
+
+  <!-- Rendered Card Block -->
+  <rect x="1000" y="60" width="380" height="500" class="box card-box" rx="5"/>
+  <text x="1190" y="85" text-anchor="middle" class="title">📱 Rendered Card</text>
+  <text x="1190" y="105" text-anchor="middle" style="font-size: 11px; fill: #666;">API Response</text>
+
+  <!-- Card Content -->
+  <text x="1015" y="135" class="code">{</text>
+
+  <!-- Highlight title -->
+  <rect x="1030" y="142" width="335" height="15" class="field-highlight" id="card-title"/>
+  <text x="1030" y="155" class="code">"title": "Dr. Sarah Johnson",</text>
+
+  <!-- Highlight subtitle -->
+  <rect x="1030" y="162" width="335" height="15" class="field-highlight" id="card-subtitle"/>
+  <text x="1030" y="175" class="code">"subtitle": "Cardiology",</text>
+
+  <!-- Highlight datetime -->
+  <rect x="1030" y="182" width="335" height="15" class="field-highlight" id="card-datetime"/>
+  <text x="1030" y="195" class="code">"datetime": "Nov 15 at 9:00",</text>
+
+  <text x="1030" y="215" class="code">"location": "Main Hospital - Room 301",</text>
+
+  <!-- Highlight procedure_count -->
+  <rect x="1030" y="222" width="335" height="15" class="field-highlight" id="card-count"/>
+  <text x="1030" y="235" class="code">"procedure_count": "3 procedure(s)",</text>
+
+  <text x="1030" y="255" class="code">"days_until": "8 days ago"</text>
+  <text x="1015" y="275" class="code">}</text>
+
+  <!-- Template expressions -->
+  <text x="1190" y="320" text-anchor="middle" style="font-size: 12px; fill: #666; font-weight: bold;">Template Expressions:</text>
+  <text x="1015" y="345" style="font-family: monospace; font-size: 11px; fill: #1565c0;">title: {$.provider.name}</text>
+  <text x="1015" y="365" style="font-family: monospace; font-size: 11px; fill: #1565c0;">subtitle: {$.provider.specialty}</text>
+  <text x="1015" y="385" style="font-family: monospace; font-size: 11px; fill: #1565c0;">datetime: {format_date($.date, '%b %d')}</text>
+  <text x="1015" y="405" style="font-family: monospace; font-size: 11px; fill: #1565c0;">           at {$.time}</text>
+  <text x="1015" y="425" style="font-family: monospace; font-size: 11px; fill: #1565c0;">procedure_count: {len($.procedures)}</text>
+  <text x="1015" y="445" style="font-family: monospace; font-size: 11px; fill: #1565c0;">                  procedure(s)</text>
+
+  <!-- Arrows from CSV to JSON -->
+
+  <!-- appointment_date arrow -->
+  <path d="M 420 245 L 545 190" class="arrow"/>
+  <text x="460" y="210" class="arrow-label">type: date</text>
+  <text x="460" y="222" class="arrow-label">conversion</text>
+
+  <!-- provider_name arrow -->
+  <path d="M 420 290 L 560 250" class="arrow"/>
+  <text x="460" y="265" class="arrow-label">nested in</text>
+  <text x="460" y="277" class="arrow-label">provider object</text>
+
+  <!-- provider_specialty arrow -->
+  <path d="M 420 310 L 560 270" class="arrow"/>
+
+  <!-- procedure_name arrow -->
+  <path d="M 420 360 L 575 390" class="arrow"/>
+  <text x="450" y="370" class="arrow-label">grouped</text>
+  <text x="450" y="382" class="arrow-label">in array</text>
+
+  <!-- copay arrow -->
+  <path d="M 420 390 L 590 430" class="arrow"/>
+
+  <!-- Arrows from JSON to Card -->
+
+  <!-- provider.name to title -->
+  <path d="M 920 255 L 1030 150" class="arrow"/>
+  <text x="950" y="195" class="arrow-label">{$.provider.name}</text>
+
+  <!-- provider.specialty to subtitle -->
+  <path d="M 920 275 L 1030 170" class="arrow"/>
+  <text x="950" y="215" class="arrow-label">{$.provider.specialty}</text>
+
+  <!-- date to datetime -->
+  <path d="M 920 195 L 1030 190" class="arrow"/>
+  <text x="940" y="180" class="arrow-label">format_date()</text>
+
+  <!-- procedures array to count -->
+  <path d="M 920 395 L 1030 230" class="arrow"/>
+  <text x="940" y="300" class="arrow-label">len($.procedures)</text>
+
+  <!-- Stage labels -->
+  <text x="220" y="870" text-anchor="middle" class="transform-label">Stage 1: CSV Transform</text>
+  <text x="710" y="870" text-anchor="middle" class="transform-label">Stage 2: Template Rendering</text>
+
+  <!-- Transform arrows at bottom -->
+  <path d="M 430 860 L 490 860" class="arrow" style="stroke: #1976d2; stroke-width: 3;"/>
+  <text x="460" y="855" style="font-family: Arial; font-size: 11px; fill: #1976d2; font-weight: bold;">batch_process.py</text>
+
+  <path d="M 930 860 L 990 860" class="arrow" style="stroke: #1976d2; stroke-width: 3;"/>
+  <text x="960" y="855" style="font-family: Arial; font-size: 11px; fill: #1976d2; font-weight: bold;">server.py</text>
+</svg>
