@@ -1,52 +1,50 @@
 {
-  "attribute": {
+  "@attribute": {
     "name": "_EHR/prescriptions",
-    "group_by": "EPI"
-  },
-  "column_types": {
-    "start_date": {
-      "type": "date",
-      "input_format": "YYYY-MM-DD",
-      "timezone": "America/New_York"
-    },
-    "end_date": {
-      "type": "date",
-      "input_format": "YYYY-MM-DD",
-      "timezone": "America/New_York"
-    },
-    "refill_date": {
-      "type": "date",
-      "input_format": "YYYY-MM-DD",
-      "timezone": "America/New_York"
-    }
-  },
-  "template": {
-    "group_by": "medication_id",
-    "template": {
-      "medication_id": "{medication_id}",
-      "medication_name": "{medication_name}",
-      "dosage": "{dosage}",
-      "frequency": "{frequency}",
-      "prescriber": {
-        "name": "{prescriber_name}",
-        "specialty": "{prescriber_specialty}"
+    "group_by": "EPI",
+    "column_types": {
+      "start_date": {
+        "type": "date",
+        "input_format": "YYYY-MM-DD"
       },
-      "status": "{status}",
-      "start_date": "{start_date}",
-      "end_date": "{end_date}",
-      "refills": {
-        "collect": [
-          {
-            "refill_date": "{refill_date}",
-            "refill_number": "{refill_number}",
-            "days_supply": "{days_supply}",
-            "quantity": "{quantity}",
-            "pharmacy": {
-              "name": "{pharmacy_name}",
-              "phone": "{pharmacy_phone}"
+      "end_date": {
+        "type": "date",
+        "input_format": "YYYY-MM-DD"
+      },
+      "refill_date": {
+        "type": "date",
+        "input_format": "YYYY-MM-DD"
+      }
+    },
+    "@array": {
+      "group_by": "medication_id",
+      "@item": {
+        "medication_id": "{medication_id}",
+        "medication_name": "{medication_name}",
+        "dosage": "{dosage}",
+        "frequency": "{frequency}",
+        "prescriber": {
+          "name": "{prescriber_name}",
+          "specialty": "{prescriber_specialty}"
+        },
+        "status": "{status}",
+        "start_date": "{start_date}",
+        "end_date": "{end_date}",
+        "refills": {
+          "@array": {
+            "collect": true,
+            "@item": {
+              "refill_date": "{refill_date}",
+              "refill_number": "{refill_number}",
+              "days_supply": "{days_supply}",
+              "quantity": "{quantity}",
+              "pharmacy": {
+                "name": "{pharmacy_name}",
+                "phone": "{pharmacy_phone}"
+              }
             }
           }
-        ]
+        }
       }
     }
   }

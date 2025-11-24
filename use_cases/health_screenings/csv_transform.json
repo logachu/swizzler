@@ -1,35 +1,33 @@
 {
-  "attribute": {
+  "@attribute": {
     "name": "_EHR/health_screenings",
-    "group_by": "EPI"
-  },
-  "column_types": {
-    "due_date": {
-      "type": "date",
-      "input_format": "YYYY-MM-DD",
-      "timezone": "America/New_York"
+    "group_by": "EPI",
+    "column_types": {
+      "due_date": {
+        "type": "date",
+        "input_format": "YYYY-MM-DD"
+      },
+      "last_completed_date": {
+        "type": "date",
+        "input_format": "YYYY-MM-DD"
+      }
     },
-    "last_completed_date": {
-      "type": "date",
-      "input_format": "YYYY-MM-DD",
-      "timezone": "America/New_York"
-    }
-  },
-  "template": {
-    "group_by": "screening_id",
-    "sort_by": {
-      "field": "due_date",
-      "order": "asc"
-    },
-    "template": {
-      "screening_id": "{screening_id}",
-      "screening_type": "{screening_type}",
-      "due_date": "{due_date}",
-      "last_completed_date": "{last_completed_date}",
-      "status": "{status}",
-      "recommended_by": "{recommended_by}",
-      "frequency": "{frequency}",
-      "notes": "{notes}"
+    "@array": {
+      "group_by": "screening_id",
+      "sort_by": {
+        "field": "due_date",
+        "order": "asc"
+      },
+      "@item": {
+        "screening_id": "{screening_id}",
+        "screening_type": "{screening_type}",
+        "due_date": "{due_date}",
+        "last_completed_date": "{last_completed_date}",
+        "status": "{status}",
+        "recommended_by": "{recommended_by}",
+        "frequency": "{frequency}",
+        "notes": "{notes}"
+      }
     }
   }
 }

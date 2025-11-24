@@ -1,7 +1,7 @@
 [
   {
     "appointment_id": "APT001",
-    "date": "2025-11-25T00:00:00-05:00",
+    "date": "2025-11-25T00:00:00",
     "time": "11:00",
     "provider": {
       "name": "Dr. Laura Smith",
@@ -33,7 +33,7 @@
   },
   {
     "appointment_id": "APT002",
-    "date": "2025-11-28T00:00:00-05:00",
+    "date": "2025-11-28T00:00:00",
     "time": "15:00",
     "provider": {
       "name": "Dr. Robert Brown",

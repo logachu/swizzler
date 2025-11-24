@@ -1,37 +1,47 @@
 {
-  "attribute": {
+  "@attribute": {
     "name": "_EHR/lab_results",
-    "group_by": "EPI"
-  },
-  "template": {
-    "group_by": "lab_order_id",
-    "sort_by": {
-      "field": "order_date",
-      "order": "desc"
+    "group_by": "EPI",
+    "column_types": {
+      "order_date": {
+        "type": "date",
+        "input_format": "YYYY-MM-DD"
+      },
+      "cost": {
+        "type": "currency"
+      }
     },
-    "template": {
-      "lab_order_id": "{lab_order_id}",
-      "order_date": "{order_date}",
-      "provider": "{provider_name}",
-      "tests": {
-        "collect": [
-          {
-            "test_code": "{test_code}",
-            "test_name": "{test_name}",
-            "result": {
-              "value": "{result_value}",
-              "unit": "{result_unit}",
-              "reference_range": "{reference_range}"
+    "@array": {
+      "group_by": "lab_order_id",
+      "sort_by": {
+        "field": "order_date",
+        "order": "desc"
+      },
+      "@item": {
+        "lab_order_id": "{lab_order_id}",
+        "order_date": "{order_date}",
+        "provider": "{provider_name}",
+        "tests": {
+          "@array": {
+            "collect": true,
+            "sort_by": {
+              "field": "test_name",
+              "order": "ascending"
             },
-            "status": "{status}",
-            "abnormal_flag": "{abnormal_flag}",
-            "priority": "{priority}",
-            "cost": "{cost}"
+            "@item": {
+              "test_code": "{test_code}",
+              "test_name": "{test_name}",
+              "result": {
+                "value": "{result_value}",
+                "unit": "{result_unit}",
+                "reference_range": "{reference_range}"
+              },
+              "status": "{status}",
+              "abnormal_flag": "{abnormal_flag}",
+              "priority": "{priority}",
+              "cost": "{cost}"
+            }
           }
-        ],
-        "sort_by": {
-          "field": "test_name",
-          "order": "ascending"
         }
       }
     }

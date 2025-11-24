@@ -1,0 +1,4 @@
+patient_id,age,height,is_smoker,weight,notes
+EPI001,42,5.9,true,185.5,Patient has allergies
+EPI002,35,6.1,false,210.0,
+EPI003,28,5.5,yes,150.3,N/A

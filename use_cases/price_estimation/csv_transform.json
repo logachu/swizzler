@@ -1,39 +1,47 @@
 {
-  "attribute": {
+  "@attribute": {
     "name": "_EHR/appointments",
-    "group_by": "EPI"
-  },
-  "column_types": {
-    "appointment_date": {
-      "type": "date",
-      "input_format": "YYYY-MM-DD",
-      "timezone": "America/New_York"
-    }
-  },
-  "template": {
-    "group_by": "appointment_id",
-    "template": {
-      "appointment_id": "{appointment_id}",
-      "date": "{appointment_date}",
-      "time": "{appointment_time}",
-      "provider": {
-        "name": "{provider_name}",
-        "specialty": "{provider_specialty}"
+    "group_by": "EPI",
+    "column_types": {
+      "appointment_date": {
+        "type": "date",
+        "input_format": "YYYY-MM-DD"
+      }
+    },
+    "@array": {
+      "group_by": "appointment_id",
+      "sort_by": {
+        "field": "appointment_date",
+        "order": "ascending"
       },
-      "location": "{location}",
-      "procedures": {
-        "collect": [
-          {
-            "code": "{procedure_code}",
-            "name": "{procedure_name}",
-            "costs": {
-              "copay": "{estimated_copay}",
-              "hospital": "{hospital_billing}",
-              "professional": "{profession_billing}",
-              "insurance_covered": "{insurance_covered}"
+      "@item": {
+        "appointment_id": "{appointment_id}",
+        "date": "{appointment_date}",
+        "time": "{appointment_time}",
+        "provider": {
+          "name": "{provider_name}",
+          "specialty": "{provider_specialty}"
+        },
+        "location": "{location}",
+        "procedures": {
+          "@array": {
+            "collect": true,
+            "sort_by": {
+              "field": "procedure_name",
+              "order": "ascending"
+            },
+            "@item": {
+              "code": "{procedure_code}",
+              "name": "{procedure_name}",
+              "costs": {
+                "copay": "{estimated_copay}",
+                "hospital": "{hospital_billing}",
+                "professional": "{profession_billing}",
+                "insurance_covered": "{insurance_covered}"
+              }
             }
           }
-        ]
+        }
       }
     }
   }

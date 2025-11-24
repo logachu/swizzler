@@ -1,0 +1,20 @@
+{
+  "@attribute": {
+    "name": "test_types",
+    "group_by": "patient_id",
+    "column_types": {
+      "age": "int",
+      "height": "float",
+      "is_smoker": "bool",
+      "weight": "float",
+      "notes": "null"
+    },
+    "@object": {
+      "age": "{age}",
+      "height": "{height}",
+      "is_smoker": "{is_smoker}",
+      "weight": "{weight}",
+      "notes": "{notes}"
+    }
+  }
+}

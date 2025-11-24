@@ -227,6 +227,125 @@ def convert_currency_to_numeric(currency_str: str) -> float:
         return 0.0
 
 
+def convert_to_int(value_str: str) -> int:
+    """
+    Convert a string to an integer.
+
+    Args:
+        value_str: The string to convert
+
+    Returns:
+        Integer value, or 0 if conversion fails
+
+    Examples:
+        "42" -> 42
+        "3.7" -> 3 (truncates)
+        "" -> 0
+        "abc" -> 0 (with warning)
+    """
+    if not value_str or not isinstance(value_str, str):
+        return 0
+
+    value_str = value_str.strip()
+    if not value_str:
+        return 0
+
+    try:
+        # Try direct int conversion first
+        return int(value_str)
+    except ValueError:
+        try:
+            # Try converting to float first, then to int (handles "3.0" -> 3)
+            return int(float(value_str))
+        except ValueError as e:
+            print(f"Warning: Could not parse int '{value_str}': {e}, returning 0")
+            return 0
+
+
+def convert_to_float(value_str: str) -> float:
+    """
+    Convert a string to a float.
+
+    Args:
+        value_str: The string to convert
+
+    Returns:
+        Float value, or 0.0 if conversion fails
+
+    Examples:
+        "42" -> 42.0
+        "3.7" -> 3.7
+        "" -> 0.0
+        "abc" -> 0.0 (with warning)
+    """
+    if not value_str or not isinstance(value_str, str):
+        return 0.0
+
+    value_str = value_str.strip()
+    if not value_str:
+        return 0.0
+
+    try:
+        return float(value_str)
+    except ValueError as e:
+        print(f"Warning: Could not parse float '{value_str}': {e}, returning 0.0")
+        return 0.0
+
+
+def convert_to_bool(value_str: str) -> bool:
+    """
+    Convert a string to a boolean.
+
+    Args:
+        value_str: The string to convert
+
+    Returns:
+        Boolean value
+
+    Examples:
+        "true", "True", "TRUE", "yes", "1" -> True
+        "false", "False", "FALSE", "no", "0", "" -> False
+    """
+    if not value_str or not isinstance(value_str, str):
+        return False
+
+    value_str = value_str.strip().lower()
+
+    # True values
+    if value_str in ("true", "yes", "1", "y", "t"):
+        return True
+
+    # False values (including empty string)
+    return False
+
+
+def convert_to_null(value_str: str) -> Optional[Any]:
+    """
+    Convert a string to None if it's empty or represents null.
+
+    Args:
+        value_str: The string to convert
+
+    Returns:
+        None if empty/null, otherwise the original string
+
+    Examples:
+        "" -> None
+        "null", "NULL", "None" -> None
+        "value" -> "value"
+    """
+    if not value_str or not isinstance(value_str, str):
+        return None
+
+    value_str_stripped = value_str.strip()
+
+    # Check for null representations
+    if not value_str_stripped or value_str_stripped.lower() in ("null", "none", "n/a", "na"):
+        return None
+
+    return value_str
+
+
 def cleanse(csv_rows: List[Dict[str, Any]], column_types: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
     """
     Cleanse and validate CSV data, applying type conversions as specified.
@@ -234,6 +353,14 @@ def cleanse(csv_rows: List[Dict[str, Any]], column_types: Optional[Dict[str, Any
     Args:
         csv_rows: List of dictionaries representing CSV rows
         column_types: Optional dict mapping column names to type specifications
+            Supported types:
+            - "date": Convert to ISO-8601 format (requires input_format, optional timezone)
+            - "currency": Convert currency strings to numeric float
+            - "int": Convert to integer
+            - "float": Convert to float
+            - "bool": Convert to boolean (true/false/yes/no/1/0)
+            - "null": Convert empty/null values to None
+            - "string": Keep as string (default if type not specified)
 
     Returns:
         List of cleansed dictionaries with type conversions applied
@@ -252,15 +379,45 @@ def cleanse(csv_rows: List[Dict[str, Any]], column_types: Optional[Dict[str, Any
             if column_name in cleaned_row:
                 value = cleaned_row[column_name]
 
-                if isinstance(type_spec, dict) and type_spec.get("type") == "date":
+                # Get type - can be dict with "type" key or just a string
+                if isinstance(type_spec, dict):
+                    type_name = type_spec.get("type")
+                else:
+                    type_name = type_spec
+
+                # Apply conversion based on type
+                if type_name == "date":
                     # Convert date columns
-                    input_format = type_spec.get("input_format")
-                    timezone = type_spec.get("timezone")  # Optional, None if not specified
+                    input_format = type_spec.get("input_format") if isinstance(type_spec, dict) else None
+                    timezone = type_spec.get("timezone") if isinstance(type_spec, dict) else None
                     cleaned_row[column_name] = convert_date_to_iso8601(value, input_format, timezone)
 
-                elif isinstance(type_spec, dict) and type_spec.get("type") == "currency":
+                elif type_name == "currency":
                     # Convert currency columns to numeric
                     cleaned_row[column_name] = convert_currency_to_numeric(value)
+
+                elif type_name == "int":
+                    # Convert to integer
+                    cleaned_row[column_name] = convert_to_int(value)
+
+                elif type_name == "float":
+                    # Convert to float
+                    cleaned_row[column_name] = convert_to_float(value)
+
+                elif type_name == "bool":
+                    # Convert to boolean
+                    cleaned_row[column_name] = convert_to_bool(value)
+
+                elif type_name == "null":
+                    # Convert to None if empty
+                    cleaned_row[column_name] = convert_to_null(value)
+
+                elif type_name == "string":
+                    # Keep as string (already done, but explicit)
+                    pass
+
+                else:
+                    print(f"Warning: Unknown type '{type_name}' for column '{column_name}', keeping as string")
 
         cleansed_rows.append(cleaned_row)
 
@@ -274,19 +431,29 @@ def combine(csv_rows: List[Dict[str, Any]], config: Dict[str, Any], output_dir: 
 
     Args:
         csv_rows: List of cleansed CSV row dictionaries
-        config: Configuration dictionary with 'attribute' and 'template' keys
+        config: Configuration dictionary with '@attribute' key containing metadata and template
         output_dir: Directory where output JSON files will be written
     """
     output_path = Path(output_dir)
     output_path.mkdir(exist_ok=True)
 
-    attribute_config = config.get("attribute", {})
+    attribute_config = config.get("@attribute", {})
+    if not attribute_config:
+        raise ValueError("Configuration must have '@attribute' key")
+
     attribute_name = attribute_config.get("name", "data")
     group_by_column = attribute_config.get("group_by")
-    template = config.get("template", {})
 
     if not group_by_column:
-        raise ValueError("Configuration must specify 'attribute.group_by'")
+        raise ValueError("Configuration must specify '@attribute.group_by'")
+
+    # Get template - @array or @object inside @attribute
+    if "@array" in attribute_config:
+        template = {"@array": attribute_config["@array"]}
+    elif "@object" in attribute_config:
+        template = {"@object": attribute_config["@object"]}
+    else:
+        raise ValueError("Configuration must have either '@array' or '@object' inside '@attribute'")
 
     # Group rows by the top-level grouping column
     grouped_data = defaultdict(list)
@@ -429,38 +596,36 @@ def apply_template(rows: List[Dict[str, Any]], template: Any) -> Any:
             return {} if isinstance(tmpl, dict) else []
 
         if isinstance(tmpl, dict):
-            # Handle special keys
-            if "collect" in tmpl:
-                # Collect all rows as array items
-                collect_template = tmpl["collect"]
-                if isinstance(collect_template, list) and collect_template:
-                    result = [build(collect_template[0], [row]) for row in data_rows]
+            # Handle @array format
+            if "@array" in tmpl:
+                array_config = tmpl["@array"]
+                item_template = array_config.get("@item", {})
 
-                    # Apply sorting if sort_by is specified
-                    if "sort_by" in tmpl:
-                        result = apply_sort(result, tmpl["sort_by"])
+                # Check if this is a collect (all rows) or group_by (deduplicate)
+                if array_config.get("collect"):
+                    # Collect all rows as separate array items
+                    result = [build(item_template, [row]) for row in data_rows]
+                elif "group_by" in array_config:
+                    # Group rows by column value
+                    group_key = array_config["group_by"]
+                    grouped = defaultdict(list)
+                    for row in data_rows:
+                        key = row.get(group_key)
+                        if key:
+                            grouped[key].append(row)
+                    result = [build(item_template, group_rows) for group_rows in grouped.values()]
+                else:
+                    raise ValueError("@array must have either 'collect' or 'group_by'")
 
-                    return result
-                return []
-
-            if "group_by" in tmpl:
-                # Group rows and apply nested template
-                group_key = tmpl["group_by"]
-                nested_template = tmpl.get("template", {})
-
-                grouped = defaultdict(list)
-                for row in data_rows:
-                    key = row.get(group_key)
-                    if key:
-                        grouped[key].append(row)
-
-                result = [build(nested_template, group_rows) for group_rows in grouped.values()]
-
-                # Apply sorting if sort_by is specified
-                if "sort_by" in tmpl:
-                    result = apply_sort(result, tmpl["sort_by"])
+                # Apply sorting if specified
+                if "sort_by" in array_config:
+                    result = apply_sort(result, array_config["sort_by"])
 
                 return result
+
+            # Handle @object format
+            if "@object" in tmpl:
+                return build(tmpl["@object"], data_rows)
 
             # Regular object mapping
             # Check for potential data loss: if multiple rows exist and we're mapping fields directly,
@@ -468,7 +633,7 @@ def apply_template(rows: List[Dict[str, Any]], template: Any) -> Any:
             if len(data_rows) > 1:
                 # Check if any non-nested fields have different values across rows
                 for key, value in tmpl.items():
-                    if key in ("group_by", "template", "sort_by"):
+                    if key.startswith("@"):
                         continue
                     # Only check non-nested fields (strings with column references)
                     if isinstance(value, str) and value.startswith("{") and value.endswith("}"):
@@ -479,13 +644,13 @@ def apply_template(rows: List[Dict[str, Any]], template: Any) -> Any:
                             raise ValueError(
                                 f"Template maps field '{key}' directly to column '{column_name}', "
                                 f"but {len(data_rows)} rows exist with different values. "
-                                f"Use 'collect' to create a list with all values, or 'group_by' to subdivide the data."
+                                f"Use '@array' with 'collect' to create a list with all values, or 'group_by' to subdivide the data."
                             )
 
             result = {}
             row = data_rows[0]  # Use first row for field values
             for key, value in tmpl.items():
-                if key in ("group_by", "template", "sort_by"):
+                if key.startswith("@"):
                     continue
                 result[key] = build(value, data_rows) if isinstance(value, dict) else pull(row, value)
             return result
@@ -513,7 +678,8 @@ def main():
 
     try:
         csv_rows, config = load(args.csv_file, args.transform_file)
-        column_types = config.get("column_types", {})
+        attribute_config = config.get("@attribute", {})
+        column_types = attribute_config.get("column_types", {})
         cleansed_rows = cleanse(csv_rows, column_types)
         combine(cleansed_rows, config, args.output)
         print("\nProcessing complete!")

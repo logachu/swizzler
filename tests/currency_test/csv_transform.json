@@ -1,21 +1,22 @@
 {
-  "column_types": {
-    "amount": {
-      "type": "currency"
-    }
-  },
-  "attribute": {
+  "@attribute": {
     "name": "test_currency",
-    "group_by": "patient_id"
-  },
-  "template": {
-    "items": {
-      "collect": [
-        {
-          "item": "{item}",
-          "amount": "{amount}"
+    "group_by": "patient_id",
+    "column_types": {
+      "amount": {
+        "type": "currency"
+      }
+    },
+    "@object": {
+      "items": {
+        "@array": {
+          "collect": true,
+          "@item": {
+            "item": "{item}",
+            "amount": "{amount}"
+          }
         }
-      ]
+      }
     }
   }
 }
