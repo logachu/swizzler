@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Match
 
-from fastapi import FastAPI, Header, HTTPException, Path as PathParam
+from fastapi import FastAPI, Header, HTTPException
 from jsonpath_ng import parse as jsonpath_parse
 from dateutil import parser as date_parser
 
@@ -1062,48 +1062,45 @@ card_renderer = CardRenderer(config_loader, attr_loader)
 section_renderer = SectionRenderer(config_loader, card_renderer)
 
 
-@app.get("/section/{section_name}")
+@app.get("/section/{section_path:path}")
 async def get_section(
-    section_name: str,
+    section_path: str,
     x_epi: str = Header(..., alias="X-EPI")
 ):
     """
     Get a section with rendered cards.
 
+    Supports both simple sections and parameterized sections:
+    - Simple: /section/home
+    - Parameterized: /section/procedures/APT001
+
+    For parameterized sections, the section configuration's "path_parameters"
+    field defines the parameter names to extract from the URL path.
+
     Args:
-        section_name: Name of the section (e.g., "home")
+        section_path: Section path, optionally with parameters (e.g., "home" or "procedures/APT001")
         x_epi: Patient identifier from X-EPI header
 
     Returns:
         Section data with title, description, and cards
     """
     try:
-        result = section_renderer.render_section(section_name, x_epi)
-        return result
-    except FileNotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error rendering section: {str(e)}")
+        # Parse the section path
+        path_parts = section_path.split('/')
+        section_name = path_parts[0]
+        path_values = path_parts[1:]  # Remaining path segments
 
+        # Load section config to get parameter names
+        section_config = config_loader.load_section(section_name)
+        path_parameters = section_config.get("path_parameters", [])
 
-@app.get("/section/procedures/{appointment_id}")
-async def get_procedures_section(
-    appointment_id: str = PathParam(...),
-    x_epi: str = Header(..., alias="X-EPI")
-):
-    """
-    Get procedures section for a specific appointment.
+        # Extract variables from path segments using parameter names from config
+        variables = {}
+        for i, param_name in enumerate(path_parameters):
+            if i < len(path_values):
+                variables[param_name] = path_values[i]
 
-    Args:
-        appointment_id: Appointment identifier from path
-        x_epi: Patient identifier from X-EPI header
-
-    Returns:
-        Section data with procedure cards
-    """
-    try:
-        variables = {"appointment_id": appointment_id}
-        result = section_renderer.render_section("procedures", x_epi, variables)
+        result = section_renderer.render_section(section_name, x_epi, variables)
         return result
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))

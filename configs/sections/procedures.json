@@ -1,6 +1,7 @@
 {
   "title": "Appointment Procedures",
   "description": "Detailed procedure list for this appointment",
+  "path_parameters": ["appointment_id"],
   "cards": [
     "procedure_card.json"
   ]

@@ -125,19 +125,25 @@ Server runs on `http://localhost:8000`
 
 ##### API Endpoints
 
-**GET /section/{section_name}**
-Returns cards for a section (e.g., "home")
+**GET /section/{section_path}**
+Returns cards for a section. Supports both simple and parameterized sections.
 
+**Simple sections:**
 ```bash
+# Get home section
 curl -H "X-EPI: EPI123456" http://localhost:8000/section/home
+
+# Get active medications section
+curl -H "X-EPI: EPI123456" http://localhost:8000/section/active_medications
 ```
 
-**GET /section/procedures/{appointment_id}**
-Returns procedure cards for a specific appointment
-
+**Parameterized sections:**
 ```bash
+# Get procedures for a specific appointment
 curl -H "X-EPI: EPI123456" http://localhost:8000/section/procedures/APT001
 ```
+
+The generic endpoint extracts path parameters based on the section configuration's `path_parameters` field. For example, `/section/procedures/APT001` looks at the `procedures.json` section config, reads `"path_parameters": ["appointment_id"]`, and extracts `appointment_id=APT001` which becomes available to card filters as `${appointment_id}`.
 
 **Headers:**
 
@@ -151,11 +157,18 @@ curl -H "X-EPI: EPI123456" http://localhost:8000/section/procedures/APT001
 {
   "title": "Section Title",
   "description": "Section description",
+  "path_parameters": ["param_name"],
   "cards": [
     "card_config_file.json"
   ]
 }
 ```
+
+**Fields:**
+- `title`: Display title for the section
+- `description`: Description text
+- `path_parameters`: (Optional) Array of parameter names to extract from URL path segments. For example, `["appointment_id"]` extracts the value from `/section/procedures/APT001` as `appointment_id=APT001`
+- `cards`: Array of card configuration filenames to render
 
 **Card Config** (`configs/cards/*.json`):
 
@@ -255,12 +268,12 @@ Use `${variable_name}` in card configs to inject URL path parameters (e.g., `${a
 4. **Fetch patient data:**
 
    ```bash
-   # Get upcoming appointments
+   # Get upcoming appointments (simple section)
    curl -H "X-EPI: EPI123456" http://localhost:8000/section/home
 
-   # Get procedures for specific appointment
+   # Get procedures for specific appointment (parameterized section)
    curl -H "X-EPI: EPI123456" http://localhost:8000/section/procedures/APT001
 
-   # Get active medications
+   # Get active medications (simple section)
    curl -H "X-EPI: EPI123456" http://localhost:8000/section/active_medications
    ```
