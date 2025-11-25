@@ -1,14 +1,26 @@
 # CSV Transform Schema Reference
 
-Reference documentation describing the format for CSV-to-JSON transform files. These are JSON files that describe how to transform denormalized data from a CSV file that is assumed to haveinto a 
+Reference documentation describing the format for CSV-to-JSON transform files. These are JSON files that describe how to transform denormalized data from a CSV file into a set of normalized JSON documents suitable to insert into PersonStore as a PersonStore attribute. It is assumed the data contains records for many patients in a health system exported from an EHR.
+
+## Goals
+
+* Impose no structure on the CSV format or headings other than having a column for EPI/MRN
+* Handle nested data to arbitrary depths
+* Handle type conversion from CSV strings to richer types including date and currency types
+* Handle dirty data / empty fields
 
 ## Overview
 
-The CSV transform schema uses an `@`-prefixed format to clearly distinguish processing directives from output field names.
+Because we want to allow customers to upload any data needed for a new use case, we can't impose a structure on the CSV. However, because data in a CSV must be denormalized for example to include multiple appointments for the same patient and include multiple procedures in each appointment, there is some ambiguity in how to transform this data into a nested structure. The system cannot determine a priori that procedures should be nested withing appointments and not appointments within procedures. More generally, if you don't know what the columns represent, you can't know their relationships to one another.
+
+Therefore some form of metadata describing the CSV is required to resolve the ambiguity. Metadata is also needed to label columns with a type to
+
+The CSV transform schema uses an `@`-prefixed format to distinguish processing directives from output field names.
 
 **Key Principle:** Keys with `@` prefix are processing directives (not in output). Keys without `@` are output field names.
 
 For details on column type conversions, see [Column Types](COLUMN_TYPES.md).
+
 ## Schema Structure
 
 ```jsonc
