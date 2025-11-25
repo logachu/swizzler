@@ -8,7 +8,7 @@
             "datetime": "Dec 02 at 09:30",
             "location": "Children's Hospital",
             "procedure_count": "2 procedure(s)",
-            "days_until": "9 days from now"
+            "days_until": "8 days from now"
         },
         {
             "title": "Dr. James Green",
@@ -16,7 +16,7 @@
             "datetime": "Dec 05 at 13:45",
             "location": "Eye Care Center",
             "procedure_count": "2 procedure(s)",
-            "days_until": "12 days from now"
+            "days_until": "11 days from now"
         }
     ]
 }

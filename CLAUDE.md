@@ -110,7 +110,7 @@ Inspired by StringTemplate (Terrence Parr), supports four canonical operations:
 **Template Expression Types:**
 - Field access: `{$.medication_name}`
 - String formatting: `{$.date} at {$.time}`
-- Functions: `{len($.items)}`, `{sum($.costs)}`, `{format_date($.date, '%b %d')}`, `{currency($.amount)}`
+- Functions: `{len($.items)}`, `{sum($.costs)}`, `{format_date($.date, 'MMM dd')}`, `{currency($.amount)}`
 - Conditionals: `?` prefix omits field if falsy
 - Path variables: `${appointment_id}` for URL parameters
 

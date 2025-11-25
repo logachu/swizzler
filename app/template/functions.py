@@ -11,6 +11,82 @@ from typing import Any
 from dateutil import parser as date_parser
 
 
+def java_to_strftime(java_pattern: str) -> str:
+    """
+    Convert Java SimpleDateFormat pattern to Python strftime format.
+
+    ⚠️ POC-ONLY CONVERSION CODE - DO NOT PORT TO JAVA ⚠️
+
+    This function exists ONLY to allow the Python POC to accept Java-style
+    date format patterns (e.g., 'yyyy-MM-dd', 'MMM dd, yyyy') in configuration
+    files. The production Java implementation will use these patterns directly
+    with SimpleDateFormat/DateTimeFormatter and will NOT need this converter.
+
+    Why Java patterns in configs?
+    - Production LogicBridge (Java/Quarkus) can use them directly
+    - Aligns with Spring Boot, Quarkus, Jackson conventions
+    - Java developers already familiar with this syntax
+    - No conversion code needed in production
+
+    Java Pattern -> Python strftime mapping:
+        yyyy -> %Y  (4-digit year)
+        yy -> %y    (2-digit year)
+        MMMM -> %B  (full month name)
+        MMM -> %b   (abbreviated month name)
+        MM -> %m    (2-digit month number)
+        dd -> %d    (2-digit day)
+        EEEE -> %A  (full weekday name)
+        EEE -> %a   (abbreviated weekday name)
+        HH -> %H    (hour 0-23)
+        hh -> %I    (hour 1-12)
+        mm -> %M    (minutes - NOTE: Java uses lowercase!)
+        ss -> %S    (seconds)
+        a -> %p     (AM/PM)
+        Z -> %z     (UTC offset)
+        z -> %Z     (timezone name)
+
+    Args:
+        java_pattern: Java SimpleDateFormat pattern string
+
+    Returns:
+        Python strftime format string
+
+    Examples:
+        >>> java_to_strftime('yyyy-MM-dd')
+        '%Y-%m-%d'
+        >>> java_to_strftime('MMM dd, yyyy')
+        '%b %d, %Y'
+        >>> java_to_strftime('EEEE, MMMM dd')
+        '%A, %B %d'
+    """
+    # Mapping from Java SimpleDateFormat tokens to Python strftime codes
+    # Order matters: process longer tokens first to avoid partial replacements
+    mappings = {
+        'yyyy': '%Y',
+        'yy': '%y',
+        'MMMM': '%B',  # Must come before MMM
+        'MMM': '%b',
+        'MM': '%m',
+        'dd': '%d',
+        'EEEE': '%A',  # Must come before EEE
+        'EEE': '%a',
+        'HH': '%H',
+        'hh': '%I',
+        'mm': '%M',    # NOTE: Java mm=minutes, but Java MM=months!
+        'ss': '%S',
+        'a': '%p',
+        'Z': '%z',
+        'z': '%Z'
+    }
+
+    result = java_pattern
+    # Sort by length descending to handle MMMM before MMM, EEEE before EEE
+    for java_token, strftime_code in sorted(mappings.items(), key=lambda x: -len(x[0])):
+        result = result.replace(java_token, strftime_code)
+
+    return result
+
+
 class ComputeFunctions:
     """Implements compute functions for card templates."""
 
@@ -42,10 +118,31 @@ class ComputeFunctions:
 
     @staticmethod
     def format_date(date_str: str, format_str: str) -> str:
-        """Format a date string according to format."""
+        """
+        Format a date string according to Java SimpleDateFormat pattern.
+
+        Accepts Java-style date format patterns (e.g., 'yyyy-MM-dd', 'MMM dd, yyyy')
+        which will be used directly in the production Java implementation.
+        The POC converts these to Python strftime format internally.
+
+        Args:
+            date_str: ISO-8601 date string or parseable date
+            format_str: Java SimpleDateFormat pattern (e.g., 'MMM dd, yyyy')
+
+        Returns:
+            Formatted date string
+
+        Examples:
+            >>> format_date('2025-12-01', 'MMM dd, yyyy')
+            'Dec 01, 2025'
+            >>> format_date('2025-12-01T00:00:00-05:00', 'MMM dd')
+            'Dec 01'
+        """
         try:
             dt = date_parser.parse(date_str)
-            return dt.strftime(format_str)
+            # Convert Java pattern to Python strftime (POC-only conversion)
+            python_format = java_to_strftime(format_str)
+            return dt.strftime(python_format)
         except Exception:
             return date_str
 

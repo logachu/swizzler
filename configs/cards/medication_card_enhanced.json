@@ -11,7 +11,7 @@
       "subtitle": "{$.dosage} - {$.frequency}",
       "prescriber": "@prescriber_info",
       "refill_status": "@refill_warning",
-      "?last_refill": "{format_date($.refills[-1].refill_date, '%b %d, %Y')}",
+      "?last_refill": "{format_date($.refills[-1].refill_date, 'MMM dd, yyyy')}",
       "?pharmacy": "{$.refills[-1].pharmacy.name}"
     },
     "prescriber_info": "Prescribed by {$.prescriber.name}, {$.prescriber.specialty}",

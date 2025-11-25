@@ -7,13 +7,12 @@
 
 1. [Executive Summary](#1-executive-summary)
 2. [Problem Statement & Requirements](#2-problem-statement--requirements)
-3. [Solution Alternatives](#3-solution-alternatives)
-4. [Architecture & Design](#4-architecture--design)
-5. [Proof of Concept Validation](#5-proof-of-concept-validation)
-6. [Technical Tradeoffs & Limitations](#6-technical-tradeoffs--limitations)
-7. [Risks & Mitigation](#7-risks--mitigation)
-8. [Production Roadmap](#8-production-roadmap)
-9. [References & Appendices](#9-references--appendices)
+3. [Architecture & Design](#3-architecture--design)
+4. [Proof of Concept Validation](#4-proof-of-concept-validation)
+5. [Technical Tradeoffs & Limitations](#5-technical-tradeoffs--limitations)
+6. [Risks & Mitigation](#6-risks--mitigation)
+7. [Production Roadmap](#7-production-roadmap)
+8. [References & Appendices](#8-references--appendices)
 
 ---
 
@@ -120,7 +119,6 @@ Any solution must support:
 
 ---
 
-
 ### 3.3 Alternative 3: Configuration-Driven Architecture (PROPOSED)
 
 **Description:** Two-stage transformation with declarative JSON configuration
@@ -141,9 +139,9 @@ Any solution must support:
 
 ---
 
-## 4. Architecture & Design
+## 3. Architecture & Design
 
-### 4.1 System Architecture Overview
+### 3.1 System Architecture Overview
 
 ```txt
 CSV File (Customer)
@@ -175,9 +173,9 @@ Mobile App Client
 
 ---
 
-### 4.2 Component Design
+### 3.2 Component Design
 
-#### 4.2.1 CSV-to-JSON Transformer (Batch Process)
+#### 3.2.1 CSV-to-JSON Transformer (Batch Process)
 
 **Purpose:** Transform denormalized CSV data into nested JSON documents for NoSQL storage.
 
@@ -186,14 +184,14 @@ Mobile App Client
 **Three-Stage Pipeline:**
 
 1. **Load Stage**
-   - Reads CSV file and transformation configuration
-   - Validates file existence and format
-   - Returns raw data and config
+   + Reads CSV file and transformation configuration
+   + Validates file existence and format
+   + Returns raw data and config
 
 2. **Cleanse Stage**
-   - Type conversions based on `column_types` configuration
-   - Validates and normalizes data values
-   - Handles 7 data types:
+   + Type conversions based on `column_types` configuration
+   + Validates and normalizes data values
+   + Handles 7 data types:
      - `string`: Text values (default)
      - `int`: Integers
      - `float`: Floating-point numbers
@@ -203,10 +201,10 @@ Mobile App Client
      - `date`: Date strings converted to ISO-8601 with timezone support
 
 3. **Combine Stage**
-   - Applies declarative schema to create nested structures
-   - Groups data by specified columns
-   - Creates arrays and objects according to template
-   - Outputs one JSON file per unique identifier (EPI)
+   + Applies declarative schema to create nested structures
+   + Groups data by specified columns
+   + Creates arrays and objects according to template
+   + Outputs one JSON file per unique identifier (EPI)
 
 **Example Usage:**
 ```bash
@@ -218,7 +216,7 @@ python batch_process.py use_cases/price_estimation/price_estimates.csv \
 
 ---
 
-#### 4.2.2 Transform Schema Language
+#### 3.2.2 Transform Schema Language
 
 **Purpose:** Declarative format for describing CSV-to-JSON transformations.
 
@@ -293,7 +291,7 @@ python batch_process.py use_cases/price_estimation/price_estimates.csv \
 
 ---
 
-#### 4.2.3 Column Type System
+#### 3.2.3 Column Type System
 
 **Purpose:** Type-safe conversion from CSV strings to typed JSON values.
 
@@ -345,11 +343,11 @@ python batch_process.py use_cases/price_estimation/price_estimates.csv \
 
 ---
 
-#### 4.2.4 Mobile App Backend Server
+#### 3.2.4 Mobile App Backend Server
 
 **Purpose:** Configuration-driven REST API for serving card-based UI data.
 
-**Implementation:** LogicBridge would implement the template engine logic in the POC's `server.py` which relies on a JSONPath library as its only dependency. 
+**Implementation:** LogicBridge would implement the template engine logic in the POC's `server.py` which relies on a JSONPath library as its only dependency.
 
 **NOTE:** There may be a good library to handle more complex expressions, but while developing the POC, I didn't find a need for complex expressions in templates beyond what is supported in a small amount of code found in app/template/*.py. It turns out the combination of template references to other templates and conditional templates can handle a suprising number of cases. I added some more cases I did not implement to TODO.md
 
@@ -380,7 +378,7 @@ TemplateEngine (app/template/engine.py)
 
 ---
 
-#### 4.2.5 API Specifications
+#### 3.2.5 API Specifications
 
 **Base URL:** `http://localhost:8000` (POC) / `https://api.praia.com` (production)
 
@@ -428,7 +426,7 @@ curl -H "X-EPI: EPI123456" \
 
 ---
 
-#### 4.2.6 Configuration System
+#### 3.2.6 Configuration System
 
 **Section Configuration** (`configs/sections/*.json`):
 
@@ -465,7 +463,7 @@ curl -H "X-EPI: EPI123456" \
     "root": {
       "title": "{$.provider.name}",
       "subtitle": "{$.provider.specialty}",
-      "date": "{format_date($.date, '%b %d')}",
+      "date": "{format_date($.date, 'MMM dd')}",
       "days_until": "{days_from_now($.date)} days",
       "copay": "{currency($.costs.copay)}",
       "procedure_count": "{len($.procedures)} procedures",
@@ -495,63 +493,160 @@ Use `${variable_name}` to inject URL path parameters:
 
 ---
 
-#### 4.2.7 Template Engine
+#### 3.2.7 Template Engine
 
 **Purpose:** Flexible, configuration-driven rendering
 
-**Design Philosophy:** Conbines JSONPath expressions to refer to fields in PersonStore attributes with four canonical template operations based on Terrence Parr's StringTemplate 
-
-> Language theory supports my premise that even a minimal StringTemplate engine with only these features is very powerful--such an engine can generate the context-free languages; see Enforcing Strict Model-View Separation in Template Engines. E.g., most programming languages are context-free as are any XML pages whose form can be expressed with a DTD.
+**Design Philosophy:** Combining JSONPath expressions to refer to fields in PersonStore attributes with four canonical template operations give a suprising amount of flexibility. The four operations are based on a paper by Terrence Parr, creator of ANTLR and StringTemplate:
 
 1. **Attribute Reference** - Access nested data fields
 2. **Template Reference** - templates can refer to other templates
 3. **Conditional Include** - Show/hide content based on a condition
 4. **Template Application to Lists** - Apply a template to each value in an array aka the map operation.
 
+> Language theory supports my premise that even a minimal StringTemplate engine with only these features is very powerful--such an engine can generate the context-free languages[...] e.g., most programming languages are context-free as are any XML pages whose form can be expressed with a DTD.
+>
+> -- Terrence Parr [https://github.com/antlr/stringtemplate4](https://github.com/antlr/stringtemplate4/blob/master/doc/motivation.md)
+
 **Template Expression Types:**
+
+The examples below show templates operating on PersonStore attribute data. We'll start with a simple medication object, then move to more complex nested structures.
+
+This is a sample JSON attribute stored in PersonStore that our templates will reference:
+
+```json
+{
+  "medication_name": "Lisinopril",
+  "dosage": "10mg",
+  "warning_message": "Take with food",
+  "refills_remaining": 2,
+  "prescriber": {
+    "name": "Dr. Sarah Johnson",
+    "specialty": "Cardiology"
+  }
+}
+```
 
 **1. Simple Field Access:**
 ```json
 {
   "title": "{$.medication_name}",
-  "dosage": "{$.dosage}"
+  "description": "Dosage: {$.dosage}"
+}
+```
+
+**Renders as:**
+```json
+{
+  "title": "Lisinopril",
+  "description": "Dosage: 10mg"
 }
 ```
 
 **2. Nested Field Access:**
 ```json
 {
-  "doctor": "{$.prescriber.name}",
-  "specialty": "{$.prescriber.specialty}"
+  "title": "{$.prescriber.name}",
+  "subtitle": "{$.prescriber.specialty}"
 }
 ```
 
-**3. String Formatting:**
+**Renders as:**
 ```json
 {
-  "datetime": "{$.date} at {$.time}",
-  "location": "Room {$.room_number}, Floor {$.floor}"
+  "title": "Dr. Sarah Johnson",
+  "subtitle": "Cardiology"
+}
+```
+
+**3. Conditional Fields:**
+Prefix field name with `?` to omit if value is falsy:
+```json
+{
+  "title": "{$.medication_name}",
+  "?warning": "{$.warning_message}",  // Included because warning_message exists
+  "?refills": "{$.refills_remaining}" // Included because refills_remaining is 2 (truthy)
+}
+```
+
+**Renders as:**
+```json
+{
+  "title": "Lisinopril",
+  "warning": "Take with food",
+  "refills": "2"
+}
+```
+
+If `warning_message` was `null` or empty, the `warning` field would be completely omitted from the output.
+
+---
+
+For more advanced examples, consider this appointment object with nested arrays:
+
+```json
+{
+  "appointment_id": "APT001",
+  "date": "2025-12-01T00:00:00-05:00",
+  "provider": {
+    "name": "Dr. Smith",
+    "specialty": "Cardiology"
+  },
+  "costs": {
+    "copay": 25.00,
+    "estimated_total": 200.00
+  },
+  "procedures": [
+    {
+      "name": "EKG",
+      "cost": 150.00
+    },
+    {
+      "name": "Blood Pressure Check",
+      "cost": 50.00
+    }
+  ],
+  "items": [
+    {"description": "Lab work", "cost": 75.00},
+    {"description": "Consultation", "cost": 125.00}
+  ]
 }
 ```
 
 **4. Compute Functions:**
 
-| Function | Description | Example | Output |
-|----------|-------------|---------|--------|
-| `len()` | Count items | `{len($.prescriptions)}` | `3` |
-| `sum()` | Sum values | `{sum($.items[*].cost)}` | `156.99` |
-| `format_date()` | Format date | `{format_date($.date, '%b %d')}` | `"Dec 01"` |
-| `days_from_now()` | Relative days | `{days_from_now($.date)}` | `7` |
+| Function | Description | Template Example | Rendered Output |
+|----------|-------------|------------------|-----------------|
+| `len()` | Count items | `{len($.procedures)} procedures` | `"2 procedures"` |
+| `sum()` | Sum values | `{sum($.procedures[*].cost)}` | `200.00` |
+| `format_date()` | Format date | `{format_date($.date, 'MMM dd')}` | `"Dec 01"` |
+| `days_from_now()` | Relative days | `{days_from_now($.date)}` | `7` (if today is Nov 24) |
 | `days_after()` | Days between dates | `{days_after($.start, $.end)}` | `14` |
-| `currency()` | Format currency | `{currency($.amount)}` | `"$1,089.99"` |
+| `currency()` | Format currency | `{currency($.costs.copay)}` | `"$25.00"` |
 
-**5. Conditional Fields:**
-Prefix field name with `?` to omit if value is falsy:
+**Example Card Template with Multiple Functions:**
 ```json
 {
-  "title": "{$.name}",
-  "?warning": "{$.warning_message}",  // Omitted if warning_message is empty/null
-  "?refills": "{$.refills_remaining}" // Omitted if refills_remaining is 0/null
+  "title": "{$.provider.name}",
+  "subtitle": "{$.provider.specialty}",
+  "date": "{format_date($.date, 'MMM dd')}",
+  "days_until": "In {days_from_now($.date)} days",
+  "procedure_count": "{len($.procedures)} procedures",
+  "copay": "{currency($.costs.copay)}",
+  "total": "{currency(sum($.procedures[*].cost))}"
+}
+```
+
+**Renders as:**
+```json
+{
+  "title": "Dr. Smith",
+  "subtitle": "Cardiology",
+  "date": "Dec 01",
+  "days_until": "In 7 days",
+  "procedure_count": "2 procedures",
+  "copay": "$25.00",
+  "total": "$200.00"
 }
 ```
 
@@ -578,7 +673,7 @@ Uses `jsonpath-ng` library with standard JSONPath syntax:
 
 ---
 
-### 4.3 Data Model
+### 3.3 Data Model
 
 **CSV Input Format (Denormalized):**
 ```csv
@@ -656,7 +751,7 @@ EPI123456,APT002,2025-12-15,Dr. Jones,Orthopedics,X-Ray,$200.00
 
 ---
 
-### 4.4 Security & Compliance
+### 3.4 Security & Compliance
 
 **[TODO: Add organization-specific security requirements]**
 
@@ -692,9 +787,9 @@ EPI123456,APT002,2025-12-15,Dr. Jones,Orthopedics,X-Ray,$200.00
 
 ---
 
-## 5. Proof of Concept Validation
+## 4. Proof of Concept Validation
 
-### 5.1 POC Objectives
+### 4.1 POC Objectives
 
 The proof-of-concept aimed to validate:
 
@@ -712,7 +807,7 @@ The proof-of-concept aimed to validate:
 
 ---
 
-### 5.2 POC Scope & Constraints
+### 4.2 POC Scope & Constraints
 
 **POC Objectives:**
 The proof-of-concept uses **Python/FastAPI** to rapidly validate:
@@ -756,7 +851,7 @@ The proof-of-concept uses **Python/FastAPI** to rapidly validate:
 
 ---
 
-### 5.3 Use Cases Implemented
+### 4.3 Use Cases Implemented
 
 #### Use Case 1: Price Estimation
 
@@ -841,7 +936,7 @@ The proof-of-concept uses **Python/FastAPI** to rapidly validate:
 
 ---
 
-### 5.4 Test Results
+### 4.4 Test Results
 
 **Test Framework:** `test_use_cases.py`
 
@@ -889,70 +984,70 @@ All tests passed! ✓
 
 ---
 
-### 5.5 POC Findings & Learnings
+### 4.5 POC Findings & Learnings
 
 **Successful Validations:**
 
 1. **Configuration Expressiveness**
-   - ✅ Schema format handles all tested nested structures
-   - ✅ Template syntax is intuitive and readable
-   - ✅ No use cases required code changes
+   + ✅ Schema format handles all tested nested structures
+   + ✅ Template syntax is intuitive and readable
+   + ✅ No use cases required code changes
 
 2. **Type System**
-   - ✅ 7 data types cover healthcare data requirements
-   - ✅ Date timezone handling works correctly
-   - ✅ Currency parsing handles various input formats
+   + ✅ 7 data types cover healthcare data requirements
+   + ✅ Date timezone handling works correctly
+   + ✅ Currency parsing handles various input formats
 
 3. **Template Engine**
-   - ✅ Compute functions are powerful and composable
-   - ✅ Conditional logic works as expected
-   - ✅ JSONPath provides necessary data access flexibility
+   + ✅ Compute functions are powerful and composable
+   + ✅ Conditional logic works as expected
+   + ✅ JSONPath provides necessary data access flexibility
 
 4. **Developer Experience**
-   - ✅ Configuration files are human-readable
-   - ✅ Errors are traceable to configuration issues
-   - ✅ Iteration time is fast (no compilation/deployment)
+   + ✅ Configuration files are human-readable
+   + ✅ Errors are traceable to configuration issues
+   + ✅ Iteration time is fast (no compilation/deployment)
 
 **Challenges Encountered:**
 
 1. **Configuration Debugging**
-   - **Issue:** Template errors can be cryptic without good tooling
-   - **Mitigation:** Added detailed error messages with context
-   - **Production Need:** Configuration validation tool with live preview
+   + **Issue:** Template errors can be cryptic without good tooling
+   + **Mitigation:** Added detailed error messages with context
+   + **Production Need:** Configuration validation tool with live preview
 
 2. **Nested Structure Complexity**
-   - **Issue:** Deep nesting (4+ levels) becomes hard to visualize
-   - **Mitigation:** Created examples and documentation
-   - **Production Need:** Interactive configuration tool with visual preview
+   + **Issue:** Deep nesting (4+ levels) becomes hard to visualize
+   + **Mitigation:** Created examples and documentation
+   + **Production Need:** Interactive configuration tool with visual preview
 
 3. **Type Inference**
-   - **Issue:** CSV columns default to strings without explicit type declaration
-   - **Mitigation:** Required explicit `column_types` in schema
-   - **Production Need:** Type inference from sample data
+   + **Issue:** CSV columns default to strings without explicit type declaration
+   + **Mitigation:** Required explicit `column_types` in schema
+   + **Production Need:** Type inference from sample data
 
 4. **Performance (Not Tested at Scale)**
-   - **Issue:** POC uses flat files, not optimized for large datasets
-   - **Mitigation:** N/A in POC
-   - **Production Need:** Performance testing with realistic data volumes
+   + **Issue:** POC uses flat files, not optimized for large datasets
+   + **Mitigation:** N/A in POC
+   + **Production Need:** Performance testing with realistic data volumes
 
 **Gaps Identified:**
 
 1. **Configuration Validation**
-   - Need: JSON schema validation for config files
-   - Need: Pre-deployment validation tooling
+   + Need: JSON schema validation for config files
+   + Need: Pre-deployment validation tooling
 
 2. **Error Handling**
-   - Need: Better error messages for configuration issues
-   - Need: Graceful degradation for missing data
+   + Need: Better error messages for configuration issues
+   + Need: Graceful degradation for missing data
 
 3. **Monitoring & Observability**
-   - Need: Template evaluation metrics
-   - Need: Configuration usage tracking
-   - Need: Performance monitoring
+   + Need: Template evaluation metrics
+   + Need: Configuration usage tracking
+   + Need: Performance monitoring
 
 ---
 
-### 5.6 POC Conclusion
+### 4.6 POC Conclusion
 
 **Feasibility: ✅ VALIDATED**
 
@@ -980,9 +1075,9 @@ The POC provides high confidence that this approach will scale to production. Th
 
 ---
 
-## 6. Technical Tradeoffs & Limitations
+## 5. Technical Tradeoffs & Limitations
 
-### 6.1 Known Limitations
+### 5.1 Known Limitations
 
 **1. Configuration Complexity**
 
@@ -1029,19 +1124,19 @@ The POC provides high confidence that this approach will scale to production. Th
 
 **Tradeoff Analysis:**
 - **Server-Side Rendering (Current):**
-  - ✅ Simpler mobile client
-  - ✅ Consistent rendering across platforms
-  - ✅ Easier to update templates without client deployment
-  - ❌ More server load
-  - ❌ Entire card must be re-fetched for updates
+  + ✅ Simpler mobile client
+  + ✅ Consistent rendering across platforms
+  + ✅ Easier to update templates without client deployment
+  + ❌ More server load
+  + ❌ Entire card must be re-fetched for updates
 
 - **Client-Side Rendering:**
-  - ✅ Reduced server load
-  - ✅ Client-side caching of data
-  - ✅ Partial updates possible
-  - ❌ More complex mobile client
-  - ❌ Need to version template syntax
-  - ❌ Harder to update templates (client deployment required)
+  + ✅ Reduced server load
+  + ✅ Client-side caching of data
+  + ✅ Partial updates possible
+  + ❌ More complex mobile client
+  + ❌ Need to version template syntax
+  + ❌ Harder to update templates (client deployment required)
 
 **POC Decision:** Server-side rendering for simplicity and future-proofing
 **Production Consideration:** Hybrid approach with configurable rendering location
@@ -1069,7 +1164,7 @@ The POC provides high confidence that this approach will scale to production. Th
 
 ---
 
-### 6.2 Technical Debt from POC
+### 5.2 Technical Debt from POC
 
 **1. Mock PersonStore**
 - **POC:** Flat JSON files in `mock_personstore/`
@@ -1113,7 +1208,7 @@ The POC provides high confidence that this approach will scale to production. Th
 
 ---
 
-### 6.3 Scalability Analysis
+### 5.3 Scalability Analysis
 
 **Data Volume Scaling:**
 
@@ -1126,51 +1221,9 @@ The POC provides high confidence that this approach will scale to production. Th
 
 ---
 
-**Number of Use Cases:**
+## 6. Risks & Mitigation
 
-| Metric | POC | Production Target | Scaling Strategy |
-|--------|-----|-------------------|------------------|
-| Use cases | 4 | 50+ | Configuration management system |
-| Card configs | 8 | 200+ | Modular, reusable card templates |
-| Transform schemas | 4 | 50+ | Schema library, validation tools |
-
----
-
-**Configuration Complexity:**
-
-| Aspect | POC | Production | Mitigation |
-|--------|-----|------------|------------|
-| Max nesting depth | 3 levels | 5+ levels | Visual configuration tool |
-| Fields per card | 10 | 50+ | Template composition, inheritance |
-| Conditional logic | Simple | Complex | Testing framework, validation |
-
----
-
-**API Throughput:**
-
-**POC Performance (Estimated):**
-- 50-100 requests/second on single instance
-- ~50ms response time for simple cards
-- No caching or optimization
-
-**Production Targets:**
-- 10,000+ requests/second (across cluster)
-- < 100ms p99 response time
-- Redis caching for hot data
-- CDN for static configurations
-
-**Scaling Approach:**
-1. Horizontal scaling of API servers
-2. Redis cluster for caching
-3. CDN for configuration files
-4. PersonStore read replicas
-5. Connection pooling and rate limiting
-
----
-
-## 7. Risks & Mitigation
-
-### 7.1 Technical Risks
+### 6.1 Technical Risks
 
 **Risk 1: Configuration Errors Lead to Data Display Issues**
 
@@ -1178,16 +1231,16 @@ The POC provides high confidence that this approach will scale to production. Th
 **Impact:** High (incorrect data shown to patients)
 **Mitigation:**
 - **Pre-deployment:**
-  - JSON schema validation for all configs
-  - Automated test suite with expected outputs
-  - Staging environment testing before production
+  + JSON schema validation for all configs
+  + Automated test suite with expected outputs
+  + Staging environment testing before production
 - **Runtime:**
-  - Comprehensive error handling with safe defaults
-  - Configuration version control with rollback capability
-  - Audit logging of configuration changes
+  + Comprehensive error handling with safe defaults
+  + Configuration version control with rollback capability
+  + Audit logging of configuration changes
 - **Detection:**
-  - Monitoring for error rates by configuration file
-  - Automated alerts on template evaluation failures
+  + Monitoring for error rates by configuration file
+  + Automated alerts on template evaluation failures
 
 ---
 
@@ -1197,15 +1250,15 @@ The POC provides high confidence that this approach will scale to production. Th
 **Impact:** High (incorrect rendering, security issues)
 **Mitigation:**
 - **Prevention:**
-  - Comprehensive unit tests for template engine
-  - Security review of expression evaluation (no code execution)
-  - Fuzz testing for edge cases
+  + Comprehensive unit tests for template engine
+  + Security review of expression evaluation (no code execution)
+  + Fuzz testing for edge cases
 - **Detection:**
-  - Automated testing on each deployment
-  - Canary deployments to catch issues early
+  + Automated testing on each deployment
+  + Canary deployments to catch issues early
 - **Response:**
-  - Fast rollback capability
-  - Clear escalation path for template engine issues
+  + Fast rollback capability
+  + Clear escalation path for template engine issues
 
 ---
 
@@ -1215,42 +1268,20 @@ The POC provides high confidence that this approach will scale to production. Th
 **Impact:** Medium (slow response times, user frustration)
 **Mitigation:**
 - **Prevention:**
-  - Performance testing with realistic data volumes
-  - Caching strategy (Redis)
-  - Database query optimization
-  - Horizontal scaling architecture
+  + Performance testing with realistic data volumes
+  + Caching strategy (Redis)
+  + Database query optimization
+  + Horizontal scaling architecture
 - **Detection:**
-  - APM monitoring (response time, throughput)
-  - Automated alerts on performance degradation
+  + APM monitoring (response time, throughput)
+  + Automated alerts on performance degradation
 - **Response:**
-  - Auto-scaling rules
-  - Performance optimization runbook
+  + Auto-scaling rules
+  + Performance optimization runbook
 
 ---
 
-**Risk 4: Data Loss During CSV Transformation**
-
-**Probability:** Low
-**Impact:** Critical (patient data loss)
-**Mitigation:**
-- **Prevention:**
-  - Comprehensive validation of transform schemas
-  - Row count verification (input vs output)
-  - Data integrity checks
-  - Schema versioning
-- **Detection:**
-  - Automated validation after each transform
-  - Alert on row count mismatches
-  - Manual spot-checking for new schemas
-- **Response:**
-  - Immediate halt of pipeline on validation failure
-  - Reprocessing from source CSV
-
-**Note:** POC identified and fixed a data loss bug (see `data_loss_bug/DATA_LOSS_BUG_DEMO.md`)
-
----
-
-### 7.2 Operational Risks
+### 6.2 Operational Risks
 
 **Risk 5: Configuration Management Complexity**
 
@@ -1258,18 +1289,18 @@ The POC provides high confidence that this approach will scale to production. Th
 **Impact:** Medium (errors, confusion, version conflicts)
 **Mitigation:**
 - **Prevention:**
-  - Git-based configuration version control
-  - Code review process for configuration changes
-  - Configuration deployment pipeline with validation
-  - Clear naming conventions and organization
+  + Git-based configuration version control
+  + Code review process for configuration changes
+  + Configuration deployment pipeline with validation
+  + Clear naming conventions and organization
 - **Tooling:**
-  - Interactive configuration tool (TODO.md item #5)
-  - Configuration validation CLI
-  - Automated documentation generation
+  + Interactive configuration tool (TODO.md item #5)
+  + Configuration validation CLI
+  + Automated documentation generation
 - **Training:**
-  - Tutorial series for developers (TODO.md item #6)
-  - Configuration best practices guide
-  - Regular training sessions
+  + Tutorial series for developers (TODO.md item #6)
+  + Configuration best practices guide
+  + Regular training sessions
 
 ---
 
@@ -1279,17 +1310,17 @@ The POC provides high confidence that this approach will scale to production. Th
 **Impact:** Medium (support team overwhelmed)
 **Mitigation:**
 - **Documentation:**
-  - Comprehensive troubleshooting guide
-  - Common configuration errors and fixes
-  - Runbooks for common issues
+  + Comprehensive troubleshooting guide
+  + Common configuration errors and fixes
+  + Runbooks for common issues
 - **Tooling:**
-  - Configuration validation tool
-  - Template preview/debugging tool
-  - Centralized error tracking
+  + Configuration validation tool
+  + Template preview/debugging tool
+  + Centralized error tracking
 - **Training:**
-  - Support team training on configuration system
-  - Escalation path to engineering
-  - Self-service diagnostic tools
+  + Support team training on configuration system
+  + Escalation path to engineering
+  + Self-service diagnostic tools
 
 ---
 
@@ -1299,18 +1330,18 @@ The POC provides high confidence that this approach will scale to production. Th
 **Impact:** Medium (inconsistencies across environments)
 **Mitigation:**
 - **Process:**
-  - Single source of truth (Git repository)
-  - Automated deployment pipeline
-  - Environment-specific configuration branches
-  - Configuration promotion workflow (dev → staging → prod)
+  + Single source of truth (Git repository)
+  + Automated deployment pipeline
+  + Environment-specific configuration branches
+  + Configuration promotion workflow (dev → staging → prod)
 - **Validation:**
-  - Automated tests run on all configuration changes
-  - Staging environment mirrors production
-  - Configuration diff tool before production deploy
+  + Automated tests run on all configuration changes
+  + Staging environment mirrors production
+  + Configuration diff tool before production deploy
 
 ---
 
-### 7.3 Business Risks
+### 6.3 Business Risks
 
 **Risk 8: Customer Adoption Challenges**
 
@@ -1318,13 +1349,13 @@ The POC provides high confidence that this approach will scale to production. Th
 **Impact:** High (slow revenue growth)
 **Mitigation:**
 - **Enable customers:**
-  - Interactive configuration tool reduces barrier to entry
-  - Professional services for initial implementations
-  - Template library of common patterns
+  + Interactive configuration tool reduces barrier to entry
+  + Professional services for initial implementations
+  + Template library of common patterns
 - **Support:**
-  - Dedicated customer success team
-  - Training materials and workshops
-  - Partner ecosystem for implementation support
+  + Dedicated customer success team
+  + Training materials and workshops
+  + Partner ecosystem for implementation support
 
 ---
 
@@ -1334,17 +1365,17 @@ The POC provides high confidence that this approach will scale to production. Th
 **Impact:** High (delayed launch, cost overruns)
 **Mitigation:**
 - **Planning:**
-  - Phased rollout approach (MVP → enhancements)
-  - Buffer time for unknowns (20-30%)
-  - Clear scope definition with must-have vs nice-to-have
+  + Phased rollout approach (MVP → enhancements)
+  + Buffer time for unknowns (20-30%)
+  + Clear scope definition with must-have vs nice-to-have
 - **Execution:**
-  - Agile development with 2-week sprints
-  - Regular stakeholder updates
-  - Early identification of blockers
+  + Agile development with 2-week sprints
+  + Regular stakeholder updates
+  + Early identification of blockers
 - **Monitoring:**
-  - Weekly progress tracking
-  - Monthly budget reviews
-  - Risk register updates
+  + Weekly progress tracking
+  + Monthly budget reviews
+  + Risk register updates
 
 **[TODO: Add organization-specific timeline and budget constraints]**
 
@@ -1358,9 +1389,9 @@ The POC provides high confidence that this approach will scale to production. Th
 
 ---
 
-## 8. Production Roadmap
+## 7. Production Roadmap
 
-### 8.1 Phase 1: Core Platform (MVP)
+### 7.1 Phase 1: Core Platform (MVP)
 
 **Objective:** Production-ready core system supporting initial use cases
 
@@ -1369,40 +1400,40 @@ The POC provides high confidence that this approach will scale to production. Th
 **Key Deliverables:**
 
 1. **Databricks Integration**
-   - Migrate `batch_process.py` logic to Databricks notebooks
-   - Implement scheduled batch jobs
-   - Add data validation and quality checks
-   - Error handling and alerting
+   + Migrate `batch_process.py` logic to Databricks notebooks
+   + Implement scheduled batch jobs
+   + Add data validation and quality checks
+   + Error handling and alerting
 
 2. **PersonStore Database Integration**
-   - Replace flat files with real PersonStore DB
-   - Implement efficient querying by EPI + attribute
-   - Add database indexing strategy
-   - Connection pooling and retry logic
+   + Replace flat files with real PersonStore DB
+   + Implement efficient querying by EPI + attribute
+   + Add database indexing strategy
+   + Connection pooling and retry logic
 
 3. **Authentication & Authorization**
-   - Replace X-EPI header with JWT validation
-   - Integrate with existing auth system
-   - Implement RBAC for different user roles
-   - Patient consent verification
+   + Replace X-EPI header with JWT validation
+   + Integrate with existing auth system
+   + Implement RBAC for different user roles
+   + Patient consent verification
 
 4. **Production Infrastructure**
-   - FastAPI deployment on Kubernetes
-   - Load balancing and auto-scaling
-   - Redis cache layer
-   - Monitoring and alerting (APM, logs, metrics)
+   + FastAPI deployment on Kubernetes
+   + Load balancing and auto-scaling
+   + Redis cache layer
+   + Monitoring and alerting (APM, logs, metrics)
 
 5. **Configuration Management**
-   - Git-based configuration repository
-   - Automated validation on commit
-   - Deployment pipeline (dev → staging → prod)
-   - Rollback capability
+   + Git-based configuration repository
+   + Automated validation on commit
+   + Deployment pipeline (dev → staging → prod)
+   + Rollback capability
 
 6. **Testing & Quality**
-   - Expanded test suite for all components
-   - Performance/load testing
-   - Security testing and penetration testing
-   - HIPAA compliance audit
+   + Expanded test suite for all components
+   + Performance/load testing
+   + Security testing and penetration testing
+   + HIPAA compliance audit
 
 **Success Criteria:**
 - Support 3-5 use cases in production
@@ -1412,7 +1443,7 @@ The POC provides high confidence that this approach will scale to production. Th
 
 ---
 
-### 8.2 Phase 2: Configuration Tooling
+### 7.2 Phase 2: Configuration Tooling
 
 **Objective:** Enable customer self-service through tooling
 
@@ -1421,28 +1452,28 @@ The POC provides high confidence that this approach will scale to production. Th
 **Key Deliverables:**
 
 1. **Interactive Configuration Tool** (TODO.md item #5)
-   - Web-based configuration editor
-   - Live preview of transformations and templates
-   - Syntax validation and error highlighting
-   - Template library of common patterns
+   + Web-based configuration editor
+   + Live preview of transformations and templates
+   + Syntax validation and error highlighting
+   + Template library of common patterns
 
 2. **Configuration Validation**
-   - JSON schema validation for configs
-   - Pre-deployment validation CLI
-   - Automated testing framework for configs
-   - Configuration lint rules
+   + JSON schema validation for configs
+   + Pre-deployment validation CLI
+   + Automated testing framework for configs
+   + Configuration lint rules
 
 3. **Tutorial & Documentation** (TODO.md item #6)
-   - Step-by-step tutorial series
-   - Video walkthroughs
-   - Configuration best practices guide
-   - API reference documentation
+   + Step-by-step tutorial series
+   + Video walkthroughs
+   + Configuration best practices guide
+   + API reference documentation
 
 4. **Developer Experience**
-   - Local development environment setup
-   - Configuration preview in development
-   - Debugging tools for template evaluation
-   - Hot-reload for rapid iteration
+   + Local development environment setup
+   + Configuration preview in development
+   + Debugging tools for template evaluation
+   + Hot-reload for rapid iteration
 
 **Success Criteria:**
 - New use case can be configured in < 1 day
@@ -1451,7 +1482,7 @@ The POC provides high confidence that this approach will scale to production. Th
 
 ---
 
-### 8.3 Phase 3: Advanced Features
+### 7.3 Phase 3: Advanced Features
 
 **Objective:** Enhanced functionality and optimizations
 
@@ -1460,34 +1491,34 @@ The POC provides high confidence that this approach will scale to production. Th
 **Key Deliverables:**
 
 1. **Server-Side vs Client-Side Templates** (TODO.md item #5)
-   - New syntax to differentiate rendering location
-   - Client SDK for template evaluation
-   - Caching strategy for client-side rendering
-   - Migration path for existing templates
+   + New syntax to differentiate rendering location
+   + Client SDK for template evaluation
+   + Caching strategy for client-side rendering
+   + Migration path for existing templates
 
 2. **Text Formatting in Templates** (TODO.md item #7)
-   - Markdown-style formatting support
-   - Links and rich text elements
-   - Conditional formatting (colors, emphasis)
-   - HTML sanitization for security
+   + Markdown-style formatting support
+   + Links and rich text elements
+   + Conditional formatting (colors, emphasis)
+   + HTML sanitization for security
 
 3. **Advanced Compute Functions**
-   - Custom function extension mechanism
-   - Statistical functions (avg, median, percentile)
-   - String manipulation functions
-   - Date/time calculations
+   + Custom function extension mechanism
+   + Statistical functions (avg, median, percentile)
+   + String manipulation functions
+   + Date/time calculations
 
 4. **Performance Optimizations**
-   - Template pre-compilation
-   - Query optimization for PersonStore
-   - CDN for configuration files
-   - GraphQL API option for flexible queries
+   + Template pre-compilation
+   + Query optimization for PersonStore
+   + CDN for configuration files
+   + GraphQL API option for flexible queries
 
 5. **Configuration Analytics**
-   - Usage tracking for configurations
-   - Performance metrics by config
-   - Error rate monitoring
-   - Recommendations for optimization
+   + Usage tracking for configurations
+   + Performance metrics by config
+   + Error rate monitoring
+   + Recommendations for optimization
 
 **Success Criteria:**
 - 50% reduction in server load through client-side rendering
@@ -1496,7 +1527,7 @@ The POC provides high confidence that this approach will scale to production. Th
 
 ---
 
-### 8.4 Phase 4: Scale & Polish
+### 7.4 Phase 4: Scale & Polish
 
 **Objective:** Enterprise-grade platform
 
@@ -1505,24 +1536,24 @@ The POC provides high confidence that this approach will scale to production. Th
 **Key Deliverables:**
 
 1. **Multi-Tenancy**
-   - Tenant isolation for configurations
-   - Per-tenant customization
-   - White-label support
+   + Tenant isolation for configurations
+   + Per-tenant customization
+   + White-label support
 
 2. **Internationalization**
-   - Multi-language support in templates
-   - Locale-aware formatting (dates, currency)
-   - Right-to-left text support
+   + Multi-language support in templates
+   + Locale-aware formatting (dates, currency)
+   + Right-to-left text support
 
 3. **Advanced Analytics**
-   - Usage dashboards for customers
-   - Data insights and recommendations
-   - A/B testing for card configurations
+   + Usage dashboards for customers
+   + Data insights and recommendations
+   + A/B testing for card configurations
 
 4. **Partner Ecosystem**
-   - API for third-party integrations
-   - Marketplace for configuration templates
-   - Partner certification program
+   + API for third-party integrations
+   + Marketplace for configuration templates
+   + Partner certification program
 
 **Success Criteria:**
 - Support 50+ use cases
@@ -1532,7 +1563,7 @@ The POC provides high confidence that this approach will scale to production. Th
 
 ---
 
-### 8.5 Resource Requirements
+### 7.5 Resource Requirements
 
 **[TODO: Fill in with organization-specific estimates]**
 
@@ -1569,9 +1600,9 @@ The POC provides high confidence that this approach will scale to production. Th
 
 ---
 
-## 9. References & Appendices
+## 8. References & Appendices
 
-### 9.1 Documentation References
+### 8.1 Documentation References
 
 - **[README.md](README.md)** - Comprehensive project overview and usage guide
 - **[CLAUDE.md](CLAUDE.md)** - Architecture summary for AI-assisted development
@@ -1580,7 +1611,7 @@ The POC provides high confidence that this approach will scale to production. Th
 - **[TEMPLATE_FORMAT.md](TEMPLATE_FORMAT.md)** - Template syntax and expression documentation
 - **[TODO.md](TODO.md)** - Completed enhancements and future roadmap
 
-### 9.2 Code Repository
+### 8.2 Code Repository
 
 **Repository:** **[TODO: Add repository URL]**
 
@@ -1588,9 +1619,9 @@ The POC provides high confidence that this approach will scale to production. Th
 - `batch_process.py` - CSV transformation script
 - `server.py` - FastAPI backend server
 - `app/` - Modular application code
-  - `config/` - Configuration loaders
-  - `rendering/` - Card and section renderers
-  - `template/` - Template engine
+  + `config/` - Configuration loaders
+  + `rendering/` - Card and section renderers
+  + `template/` - Template engine
 - `configs/` - Section and card configurations
 - `use_cases/` - Example implementations with test data
 - `mock_personstore/` - Generated JSON files (POC)
@@ -1613,7 +1644,7 @@ python server.py
 python test_use_cases.py
 ```
 
-### 9.3 Appendix A: Use Case Examples
+### 8.3 Appendix A: Use Case Examples
 
 #### Price Estimation Use Case
 
@@ -1698,7 +1729,7 @@ EPI123456,Lisinopril,10mg,Once daily,2025-01-01,2025-12-31,Dr. Smith,Cardiology
 
 ---
 
-### 9.4 Appendix B: Configuration Quick Reference
+### 8.4 Appendix B: Configuration Quick Reference
 
 #### Transform Schema Syntax
 
@@ -1738,7 +1769,7 @@ EPI123456,Lisinopril,10mg,Once daily,2025-01-01,2025-12-31,Dr. Smith,Cardiology
       "formatted": "{$.date} at {$.time}",
       "count": "{len($.items)} items",
       "sum": "Total: {currency(sum($.items[*].cost))}",
-      "date": "{format_date($.date, '%b %d')}",
+      "date": "{format_date($.date, 'MMM dd')}",
       "relative": "In {days_from_now($.date)} days",
       "?conditional": "Only shown if truthy"
     }
@@ -1759,7 +1790,7 @@ EPI123456,Lisinopril,10mg,Once daily,2025-01-01,2025-12-31,Dr. Smith,Cardiology
 
 ---
 
-### 9.5 Glossary
+### 8.5 Glossary
 
 | Term | Definition |
 |------|------------|

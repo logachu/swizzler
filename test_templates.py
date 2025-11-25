@@ -128,7 +128,7 @@ class TestOperation1AttributeReference:
         )
 
         card1 = cards[0]
-        # Format is '%b %d, %Y' which should be like "Jan 15, 2025"
+        # Format is 'MMM dd, yyyy' which should be like "Jan 15, 2025"
         assert card1["last_refill"] == "Jan 15, 2025"
 
     def test_optional_field_with_question_mark(self, card_renderer):
@@ -398,13 +398,13 @@ class TestComputeFunctions:
         assert compute.sum(["$10.00", "$20.50"]) == 30.50
 
     def test_format_date(self):
-        """Test format_date() function."""
+        """Test format_date() function with Java SimpleDateFormat patterns."""
         compute = ComputeFunctions()
 
-        result = compute.format_date("2025-01-15T00:00:00-05:00", "%b %d, %Y")
+        result = compute.format_date("2025-01-15T00:00:00-05:00", "MMM dd, yyyy")
         assert result == "Jan 15, 2025"
 
-        result = compute.format_date("2025-01-15", "%Y-%m-%d")
+        result = compute.format_date("2025-01-15", "yyyy-MM-dd")
         assert result == "2025-01-15"
 
     def test_days_from_now(self):

@@ -4,7 +4,7 @@
   "template": {
     "title": "{$.provider.name}",
     "subtitle": "{$.provider.specialty}",
-    "datetime": "{format_date($.date, '%b %d')} at {$.time}",
+    "datetime": "{format_date($.date, 'MMM dd')} at {$.time}",
     "location": "{$.location}",
     "procedure_count": "{len($.procedures)} procedure(s)",
     "days_until": "{days_from_now($.date)}"

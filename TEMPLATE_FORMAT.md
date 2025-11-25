@@ -85,10 +85,12 @@ NOTE: array slice syntax could be added as a future enhancement, but I couldnt' 
 **Supported Functions:**
 - `len(array)` - Count items in an array
 - `sum(array.numericField)` - Sum numeric values
-- `format_date(date, format)` - Format dates (e.g., `'%b %d, %Y'`)
+- `format_date(date, format)` - Format dates using Java SimpleDateFormat patterns (e.g., `'MMM dd, yyyy'`)
 - `days_from_now(date)` - Calculate days until/since a date (returns string like "5 days from now")
 - `days_after(date)` - Calculate days after a date (returns number: positive if overdue, negative if upcoming, 0 if today)
 - `currency(amount)` - Format numeric value as currency with dollar sign, comma thousands separator, and exactly two decimal places (e.g., 1089.99 → "$1,089.99")
+
+**Note:** Date format patterns use Java SimpleDateFormat syntax (e.g., `'yyyy-MM-dd'`, `'MMM dd, yyyy'`) which will be used directly in the production Java implementation.
 
 NOTE: could add other date-related functions that resolve to hours, weeks, months, years, etc. or a generic time_from_now('days', "01-01-1970")
 
@@ -337,13 +339,13 @@ List templates can use conditionals and nested references:
       "prescriber": "@prescriber_info",
       "status": "@medication_status",
       "refills": "@refill_message",
-      "?last_refill_date": "{format_date($.refills[-1].refill_date, '%b %d, %Y')}"
+      "?last_refill_date": "{format_date($.refills[-1].refill_date, 'MMM dd, yyyy')}"
     },
     "prescriber_info": "Prescribed by {$.prescriber.name}, {$.prescriber.specialty}",
     "medication_status": {
       "condition": "$.status == 'active'",
       "if_true": "✓ Active",
-      "if_false": "Discontinued {format_date($.end_date, '%b %Y')}"
+      "if_false": "Discontinued {format_date($.end_date, 'MMM yyyy')}"
     },
     "refill_message": {
       "condition": "len($.refills) < 2",
@@ -403,7 +405,7 @@ List templates can use conditionals and nested references:
     "root": {
       "title": "{$.provider.name}",
       "subtitle": "{$.provider.specialty}",
-      "datetime": "{format_date($.date, '%b %d')} at {$.time}",
+      "datetime": "{format_date($.date, 'MMM dd')} at {$.time}",
       "location": "{$.location}",
       "status_message": "@appointment_status",
       "procedures": "{$.procedures|@procedure_display|separator=', '}",
@@ -424,7 +426,7 @@ List templates can use conditionals and nested references:
           "show": "⏰ Upcoming in {days_from_now($.date)} days"
         }
       ],
-      "default": "Scheduled for {format_date($.date, '%b %d')}"
+      "default": "Scheduled for {format_date($.date, 'MMM dd')}"
     },
     "procedure_display": "{$.procedure_name}",
     "prep_instructions": {
@@ -461,7 +463,7 @@ List templates can use conditionals and nested references:
 | **List application** | `{$.array\|@template}` | `{$.items\|@line_item}` |
 | **With separator** | `{$.array\|@template\|separator='x'}` | `{$.items\|@line\|separator='\n'}` |
 | **Optional field** | `?field_name` | `?insurance_info` |
-| **Function call** | `{function(arg)}` | `{format_date($.date, '%b %d')}` |
+| **Function call** | `{function(arg)}` | `{format_date($.date, 'MMM dd')}` |
 | **Parameter reference** | `{param_name}` | In template body: `{amount}` |
 
 ### Conditional Syntax

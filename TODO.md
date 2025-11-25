@@ -49,7 +49,7 @@ Added support for displaying dates in user-friendly formats in card UI. The `for
 ```json
 {
   "template": {
-    "datetime": "{format_date($.date, '%b %d')} at {$.time}",
+    "datetime": "{format_date($.date, 'MMM dd')} at {$.time}",
     "days_until": "{days_from_now($.date)}"
   }
 }

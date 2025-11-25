@@ -11,7 +11,7 @@
       "subtitle": "{$.dosage} - {$.frequency}",
       "prescriber": "{$.prescriber.name}, {$.prescriber.specialty}",
       "refill_count": "{len($.refills)}",
-      "?last_refill": "{format_date($.refills[-1].refill_date, '%b %d, %Y')}",
+      "?last_refill": "{format_date($.refills[-1].refill_date, 'MMM dd, yyyy')}",
       "status": "{$.status}"
     }
   }

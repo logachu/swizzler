@@ -185,7 +185,7 @@ The generic endpoint extracts path parameters based on the section configuration
     "title": "{$.name}",
     "subtitle": "{$.specialty}",
     "count": "{len($.procedures)} items",
-    "formatted_date": "{format_date($.date, '%b %d')}",
+    "formatted_date": "{format_date($.date, 'MMM dd')}",
     "days_until": "{days_from_now($.date)}",
     "conditional_field": "?Only shown if value exists"
   }
@@ -199,7 +199,7 @@ The generic endpoint extracts path parameters based on the section configuration
 3. **Compute functions:**
    * `{len($.array)}` - Count array items
    * `{sum($.array)}` - Sum numeric values
-   * `{format_date($.date, '%b %d')}` - Format dates
+   * `{format_date($.date, 'MMM dd')}` - Format dates using Java SimpleDateFormat patterns
    * `{days_from_now($.date)}` - Relative date display
    * `{currency($.amount)}` - Format as currency (e.g., "$1,089.99")
 4. **Conditional fields:** Prefix with `?` to omit if falsy
