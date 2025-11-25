@@ -795,15 +795,14 @@ The proof-of-concept aimed to validate:
 
 1. **Feasibility:** Can configuration-driven approach handle arbitrary nested data?
 2. **Expressiveness:** Are schema and template formats sufficient for real use cases?
-3. **Performance:** Do transformation and rendering perform adequately?
-4. **Completeness:** Can all stated requirements be met?
+3. **Completeness:** Can all stated requirements be met?
 
 **Success Criteria:**
 - ✅ Implement 3+ real-world use cases with only configuration changes
 - ✅ Support all required data types and operations
 - ✅ Demonstrate nested structures (3+ levels deep)
-- ✅ Validate template engine expressiveness (conditional, computed fields)
-- ✅ Automated test suite with expected output validation
+- ✅ Validate template engine expressiveness (jsonpath expressions, conditionals, computed fields)
+- ✅ Test suite that validates against expected output
 
 ---
 
@@ -827,9 +826,9 @@ The proof-of-concept uses **Python/FastAPI** to rapidly validate:
 - Configuration format validation
 
 **Out of Scope:**
-- Production authentication (used X-EPI header simulation)
-- Real Databricks integration (emulated locally with Python script)
-- Real PersonStore database (used flat JSON files)
+- Production authentication (replaced JWT with X-EPI header)
+- Real Databricks integration (used standalone Python script)
+- Real PersonStore database (used flat JSON files with names that mashup EPI, namespace, and attribute)
 - LogicBridge/Quarkus integration (used Python/FastAPI instead)
 - Performance/scale testing
 - Configuration validation tooling
@@ -837,16 +836,16 @@ The proof-of-concept uses **Python/FastAPI** to rapidly validate:
 
 **Simplifications Made:**
 - **Python/FastAPI instead of LogicBridge/Quarkus** - Faster POC development, validates approach
-- **batch_process.py instead of Databricks** - Local emulation of pipeline logic
+- **batch_process.py instead of Databricks** - batch_proces.py script divided into three parts to emulate databricks bronze,silver,gold stages
 - **X-EPI header instead of JWT** - Authentication simulation
 - **mock_personstore/ directory instead of PersonStore DB** - Flat file storage
-- **No audit logging or monitoring** - Not needed for validation
-- **Limited error handling** - Focus on happy path validation
+- **No audit logging or monitoring**
+- **Limited error handling** - Focus on validating happy path
 
 **Production Migration Path:**
 1. **Databricks Pipeline:** Adapt `batch_process.py` logic to Databricks Python notebooks
 2. **LogicBridge Integration:** Port template engine logic to Java/Quarkus (or use GraalVM for Python interop)
-3. **PersonStore Integration:** Replace flat file reading with database queries
+3. **PersonStore Integration:** Replace flat file reading with PersonStore calls
 4. **Authentication:** Integrate existing JWT validation in LogicBridge
 
 ---
@@ -855,7 +854,7 @@ The proof-of-concept uses **Python/FastAPI** to rapidly validate:
 
 #### Use Case 1: Price Estimation
 
-**Description:** Display upcoming appointments with procedure cost estimates.
+**Description:** Display upcoming appointments containing multiple procedures with cost estimates.
 
 **Data Complexity:**
 - Nested objects: Appointment → Provider, Costs
