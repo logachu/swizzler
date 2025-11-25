@@ -15,10 +15,14 @@ import subprocess
 import time
 import sys
 import signal
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
 import requests
 from difflib import unified_diff
+
+# Import functions module to override _get_current_datetime
+import app.template.functions
 
 
 class UseCase:
@@ -256,6 +260,11 @@ def main():
     print("Use Case Testing Suite")
     print("="*70)
 
+    # Set stable test date (November 24, 2025) for reproducible test results
+    original_get_current_datetime = app.template.functions._get_current_datetime
+    app.template.functions._get_current_datetime = lambda: datetime(2025, 11, 24)
+    print("✓ Test date set to November 24, 2025 for stable date-dependent outputs")
+
     tester = ServerTester()
 
     try:
@@ -298,6 +307,8 @@ def main():
 
     finally:
         tester.stop_server()
+        # Restore original datetime function
+        app.template.functions._get_current_datetime = original_get_current_datetime
 
 
 if __name__ == "__main__":

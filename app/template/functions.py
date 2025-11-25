@@ -6,9 +6,13 @@ values from arrays.
 """
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Callable
 
 from dateutil import parser as date_parser
+
+
+# Function to get current datetime - can be overridden in tests
+_get_current_datetime: Callable[[], datetime] = lambda: datetime.now()
 
 
 def java_to_strftime(java_pattern: str) -> str:
@@ -154,10 +158,10 @@ class ComputeFunctions:
             # Handle timezone-aware datetimes
             if dt.tzinfo is not None:
                 # Get current time in the same timezone as the parsed date
-                today = datetime.now(dt.tzinfo).replace(hour=0, minute=0, second=0, microsecond=0)
+                today = _get_current_datetime().replace(tzinfo=dt.tzinfo, hour=0, minute=0, second=0, microsecond=0)
                 dt = dt.replace(hour=0, minute=0, second=0, microsecond=0)
             else:
-                today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                today = _get_current_datetime().replace(hour=0, minute=0, second=0, microsecond=0)
                 dt = dt.replace(hour=0, minute=0, second=0, microsecond=0)
 
             delta = (dt - today).days
@@ -188,10 +192,10 @@ class ComputeFunctions:
             # Handle timezone-aware datetimes
             if dt.tzinfo is not None:
                 # Get current time in the same timezone as the parsed date
-                today = datetime.now(dt.tzinfo).replace(hour=0, minute=0, second=0, microsecond=0)
+                today = _get_current_datetime().replace(tzinfo=dt.tzinfo, hour=0, minute=0, second=0, microsecond=0)
                 dt = dt.replace(hour=0, minute=0, second=0, microsecond=0)
             else:
-                today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+                today = _get_current_datetime().replace(hour=0, minute=0, second=0, microsecond=0)
                 dt = dt.replace(hour=0, minute=0, second=0, microsecond=0)
 
             delta = (today - dt).days
